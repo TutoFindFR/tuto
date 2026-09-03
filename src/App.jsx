@@ -132,7 +132,7 @@ function App() {
     <div className="app">
       <h1 className="logo">TutoFind</h1>
 
-      <p>Trouvez le tutoriel qu'il vous faut.</p>
+      <p>Trouvez facilement des tutoriels vidéo sur tous les sujets.</p>
 
       <div className="search">
         <input
