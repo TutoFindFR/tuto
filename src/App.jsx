@@ -176,11 +176,13 @@ function App() {
           <button
             key={nom}
             onClick={() => {
-              setCategorie(nom);
-              setResultats([]);
-              setErreur("");
-              lancerRecherche(recherche, nom);
-            }}
+  const nouvelleCategorie = categorie === nom ? "" : nom;
+
+  setCategorie(nouvelleCategorie);
+  setResultats([]);
+  setErreur("");
+  lancerRecherche(recherche, nouvelleCategorie);
+}}
             className={categorie === nom ? "active" : ""}
           >
             {nom}
