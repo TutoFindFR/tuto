@@ -7,6 +7,7 @@ function App() {
   const [recherche, setRecherche] = useState("");
   const [categorie, setCategorie] = useState("");
   const [resultats, setResultats] = useState([]);
+
   const [recherchesRecentes, setRecherchesRecentes] = useState(() => {
     const recherchesSauvegardees =
       localStorage.getItem("recherchesRecentes");
@@ -15,6 +16,16 @@ function App() {
       ? JSON.parse(recherchesSauvegardees)
       : [];
   });
+
+  const [favoris, setFavoris] = useState(() => {
+    const favorisSauvegardes = localStorage.getItem("favoris");
+
+    return favorisSauvegardes
+      ? JSON.parse(favorisSauvegardes)
+      : [];
+  });
+
+  const [afficherFavoris, setAfficherFavoris] = useState(false);
 
   const resultatsRef = useRef(null);
   const [pageToken, setPageToken] = useState("");
@@ -26,6 +37,10 @@ function App() {
     );
   }, [recherchesRecentes]);
 
+  useEffect(() => {
+    localStorage.setItem("favoris", JSON.stringify(favoris));
+  }, [favoris]);
+
   const categories = [
     "Maison",
     "Bricolage",
@@ -35,14 +50,34 @@ function App() {
     "Informatique",
   ];
 
+  const gererFavori = (video) => {
+    setFavoris((anciensFavoris) => {
+      const dejaFavori = anciensFavoris.some(
+        (favori) => favori.id.videoId === video.id.videoId
+      );
+
+      if (dejaFavori) {
+        return anciensFavoris.filter(
+          (favori) => favori.id.videoId !== video.id.videoId
+        );
+      }
+
+      return [...anciensFavoris, video];
+    });
+  };
+
   const lancerRecherche = async (
     rechercheAUtiliser = recherche,
     categorieRecherche = categorie
   ) => {
     if (rechercheAUtiliser.trim() === "" && !categorieRecherche) {
-      setErreur("Choisis une catégorie ou écris quelque chose à rechercher.");
+      setErreur(
+        "Choisis une catégorie ou écris quelque chose à rechercher."
+      );
       return;
     }
+
+    setAfficherFavoris(false);
 
     if (rechercheAUtiliser.trim() !== "") {
       setRecherche(rechercheAUtiliser);
@@ -52,7 +87,9 @@ function App() {
 
         const nouvelles = [
           nouvelleRecherche,
-          ...anciennes.filter((item) => item !== nouvelleRecherche),
+          ...anciennes.filter(
+            (item) => item !== nouvelleRecherche
+          ),
         ];
 
         return nouvelles.slice(0, 5);
@@ -64,11 +101,14 @@ function App() {
     setErreur("");
 
     try {
+      const termeRecherche =
+        categorieRecherche && rechercheAUtiliser.trim()
+          ? `${categorieRecherche} ${rechercheAUtiliser} tutoriel`
+          : `${categorieRecherche || rechercheAUtiliser} tutoriel`;
+
       const response = await fetch(
         `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(
-          categorieRecherche && rechercheAUtiliser.trim()
-            ? `${categorieRecherche} ${rechercheAUtiliser} tutoriel`
-            : `${categorieRecherche || rechercheAUtiliser} tutoriel`
+          termeRecherche
         )}&type=video&maxResults=12&key=${import.meta.env.VITE_YOUTUBE_API_KEY}`
       );
 
@@ -92,7 +132,9 @@ function App() {
       setChargement(false);
     } catch (error) {
       console.error("Erreur YouTube :", error);
-      setErreur("Impossible de récupérer les résultats. Réessaie.");
+      setErreur(
+        "Impossible de récupérer les résultats. Réessaie."
+      );
       setChargement(false);
     }
   };
@@ -103,11 +145,13 @@ function App() {
     setChargement(true);
 
     try {
+      const termeRecherche = categorie
+        ? `${categorie} ${recherche} tutoriel`
+        : `${recherche} tutoriel`;
+
       const response = await fetch(
         `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(
-          categorie
-            ? `${categorie} ${recherche} tutoriel`
-            : `${recherche} tutoriel`
+          termeRecherche
         )}&type=video&maxResults=12&pageToken=${pageToken}&key=${import.meta.env.VITE_YOUTUBE_API_KEY}`
       );
 
@@ -123,16 +167,25 @@ function App() {
       setPageToken(data.nextPageToken || "");
       setChargement(false);
     } catch (error) {
-      console.error("Erreur chargement supplémentaire :", error);
+      console.error(
+        "Erreur chargement supplémentaire :",
+        error
+      );
       setChargement(false);
     }
   };
+
+  const videosAffichees = afficherFavoris
+    ? favoris
+    : resultats;
 
   return (
     <div className="app">
       <h1 className="logo">TutoFind</h1>
 
-      <p>Trouvez facilement des tutoriels vidéo sur tous les sujets.</p>
+      <p>
+        Trouvez facilement des tutoriels vidéo sur tous les sujets.
+      </p>
 
       <div className="search">
         <input
@@ -148,119 +201,237 @@ function App() {
           spellCheck="false"
         />
 
-        <button className="search-button" onClick={() => lancerRecherche()}>
+        <button
+          className="search-button"
+          onClick={() => lancerRecherche()}
+        >
           Rechercher
         </button>
+
+        <div className="mes-favoris">
+          <button
+            onClick={() =>
+              setAfficherFavoris(!afficherFavoris)
+            }
+          >
+            {afficherFavoris
+  ? "← Retour aux résultats"
+  : `⭐ Mes favoris (${favoris.length})`}
+          </button>
+        </div>
       </div>
 
-      {recherchesRecentes.length > 0 && (
-        <div className="recherches-recentes">
-          <span>Recherches récentes :</span>
+      {recherchesRecentes.length > 0 &&
+        !afficherFavoris && (
+          <div className="recherches-recentes">
+            <span>Recherches récentes :</span>
 
-          {recherchesRecentes.map((item) => (
+            {recherchesRecentes.map((item) => (
+              <button
+                key={item}
+                onClick={() => {
+                  setRecherche(item);
+                  lancerRecherche(item);
+                }}
+              >
+                {item}
+              </button>
+            ))}
+          </div>
+        )}
+
+      {!afficherFavoris && (
+        <div className="categories">
+          {categories.map((nom) => (
             <button
-              key={item}
+              key={nom}
               onClick={() => {
-                setRecherche(item);
-                lancerRecherche(item);
+                const nouvelleCategorie =
+                  categorie === nom ? "" : nom;
+
+                setCategorie(nouvelleCategorie);
+                setResultats([]);
+                setErreur("");
+
+                lancerRecherche(
+                  recherche,
+                  nouvelleCategorie
+                );
               }}
+              className={
+                categorie === nom ? "active" : ""
+              }
             >
-              {item}
+              {nom}
             </button>
           ))}
         </div>
       )}
 
-      <div className="categories">
-        {categories.map((nom) => (
-          <button
-            key={nom}
-            onClick={() => {
-  const nouvelleCategorie = categorie === nom ? "" : nom;
-
-  setCategorie(nouvelleCategorie);
-  setResultats([]);
-  setErreur("");
-  lancerRecherche(recherche, nouvelleCategorie);
-}}
-            className={categorie === nom ? "active" : ""}
+      {afficherFavoris ? (
+        <>
+          <div
+            className="titre-resultats"
+            ref={resultatsRef}
           >
-            {nom}
-          </button>
-        ))}
-      </div>
-
-      {categorie && <p>Catégorie sélectionnée : {categorie}</p>}
-
-      {chargement && <p>Recherche en cours...</p>}
-
-      {!chargement && !erreur && resultats.length === 0 && (
-        <div className="message-accueil">
-          <h2>Que voulez-vous apprendre aujourd'hui ?</h2>
-          <p>Recherchez un tutoriel ou choisissez une catégorie.</p>
-        </div>
-      )}
-
-      {erreur && <p>{erreur}</p>}
-
-      {resultats.length > 0 && (
-        <div className="titre-resultats" ref={resultatsRef}>
-          <h2>Résultats pour : {recherche}</h2>
-          <p>{resultats.length} résultats trouvés</p>
-        </div>
-      )}
-
-      <div className="resultats">
-        {resultats.map((resultat) => (
-          <div className="resultat" key={resultat.id.videoId}>
-            <div className="image-resultat">
-              <img
-                src={resultat.snippet.thumbnails.medium.url}
-                alt={resultat.snippet.title}
-              />
-
-              <span className="badge-tutoriel">TUTORIEL</span>
-            </div>
-
-            <h3>{resultat.snippet.title}</h3>
-
-            <small>
-              <span className="chaine">
-                {resultat.snippet.channelTitle}
-              </span>
-
-              <span className="date-video">
-                {" "}·{" "}
-                {new Date(
-                  resultat.snippet.publishedAt
-                ).toLocaleDateString("fr-FR")}
-              </span>
-            </small>
-
+            <h2>⭐ Mes favoris</h2>
             <p>
-              {resultat.snippet.description.length > 120
-                ? resultat.snippet.description.substring(0, 120) + "..."
-                : resultat.snippet.description}
+              {favoris.length}{" "}
+              {favoris.length > 1
+                ? "tutoriels enregistrés"
+                : "tutoriel enregistré"}
             </p>
-
-            <a
-              href={`https://www.youtube.com/watch?v=${resultat.id.videoId}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Voir le tutoriel
-            </a>
           </div>
-        ))}
-      </div>
 
-      {pageToken && (
+          {favoris.length === 0 && (
+            <div className="message-accueil">
+              <h2>Aucun favori pour le moment</h2>
+              <p>
+                Ajoutez des tutoriels à vos favoris avec
+                l'étoile ⭐.
+              </p>
+            </div>
+          )}
+        </>
+      ) : (
+        <>
+          {categorie && (
+            <p>
+              Catégorie sélectionnée : {categorie}
+            </p>
+          )}
+
+          {chargement && (
+            <p>Recherche en cours...</p>
+          )}
+
+          {!chargement &&
+            !erreur &&
+            resultats.length === 0 && (
+              <div className="message-accueil">
+                <h2>
+                  Que voulez-vous apprendre aujourd'hui ?
+                </h2>
+                <p>
+                  Recherchez un tutoriel ou choisissez une
+                  catégorie.
+                </p>
+              </div>
+            )}
+
+          {erreur && <p>{erreur}</p>}
+
+          {resultats.length > 0 && (
+            <div
+              className="titre-resultats"
+              ref={resultatsRef}
+            >
+              <h2>
+                Résultats pour : {recherche}
+              </h2>
+              <p>
+                {resultats.length} résultats trouvés
+              </p>
+            </div>
+          )}
+        </>
+      )}
+
+      {videosAffichees.length > 0 && (
+        <div className="resultats">
+          {videosAffichees.map((resultat) => {
+            const estFavori = favoris.some(
+              (favori) =>
+                favori.id.videoId ===
+                resultat.id.videoId
+            );
+
+            return (
+              <div
+                className="resultat"
+                key={resultat.id.videoId}
+              >
+                <div className="image-resultat">
+                  <img
+                    src={
+                      resultat.snippet.thumbnails.medium.url
+                    }
+                    alt={resultat.snippet.title}
+                  />
+
+                  <span className="badge-tutoriel">
+                    TUTORIEL
+                  </span>
+
+                  <button
+                    className={`bouton-favori ${
+                      estFavori
+                        ? "favori-actif"
+                        : ""
+                    }`}
+                    onClick={() =>
+                      gererFavori(resultat)
+                    }
+                    aria-label={
+                      estFavori
+                        ? "Retirer des favoris"
+                        : "Ajouter aux favoris"
+                    }
+                  >
+                    {estFavori ? "★" : "☆"}
+                  </button>
+                </div>
+
+                <h3>
+                  {resultat.snippet.title}
+                </h3>
+
+                <small>
+                  <span className="chaine">
+                    {resultat.snippet.channelTitle}
+                  </span>
+
+                  <span className="date-video">
+                    {" "}
+                    ·{" "}
+                    {new Date(
+                      resultat.snippet.publishedAt
+                    ).toLocaleDateString("fr-FR")}
+                  </span>
+                </small>
+
+                <p>
+                  {resultat.snippet.description.length >
+                  120
+                    ? resultat.snippet.description.substring(
+                        0,
+                        120
+                      ) + "..."
+                    : resultat.snippet.description}
+                </p>
+
+                <a
+                  href={`https://www.youtube.com/watch?v=${resultat.id.videoId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Voir le tutoriel
+                </a>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {!afficherFavoris && pageToken && (
         <button
           className="voir-plus"
           onClick={chargerPlus}
           disabled={chargement}
         >
-          {chargement ? "Chargement..." : "Voir plus"}
+          {chargement
+            ? "Chargement..."
+            : "Voir plus"}
         </button>
       )}
     </div>

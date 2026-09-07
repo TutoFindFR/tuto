@@ -466,3 +466,56 @@ button:hover {
     margin: 35px auto;
   }
 }
+.bouton-favori {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  z-index: 2;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: white;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.6);
+}
+.bouton-favori.favori-actif {
+  color: #ff4d00;
+}
+.mes-favoris button {
+  padding: 8px 12px;
+  font-size: 13px;
+}
+@media (max-width: 700px) {
+  .search {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    flex-direction: column;
+  }
+
+  .search input,
+  .search-button,
+  .mes-favoris,
+  .mes-favoris button {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .mes-favoris button {
+    padding: 12px;
+    font-size: 14px;
+  }
+}
+@media (max-width: 700px) {
+  .mes-favoris {
+    display: block;
+    width: 100%;
+  }
+
+  .mes-favoris button {
+    display: block;
+    width: 100%;
+  }
+}
