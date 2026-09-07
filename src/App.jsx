@@ -125,14 +125,29 @@ function App() {
     "étape",
     "débutant",
   ];
+  const motsIndesirables = [
+  "vlog",
+  "reaction",
+  "réaction",
+  "actualité",
+  "news",
+  "live",
+  "podcast",
+];
 
-  const score = (video) => {
-    const titre = video.snippet.title.toLowerCase();
+const score = (video) => {
+  const titre = video.snippet.title.toLowerCase();
 
-    return motsTutoriel.reduce((total, mot) => {
-      return total + (titre.includes(mot) ? 1 : 0);
-    }, 0);
-  };
+  let total = motsTutoriel.reduce((score, mot) => {
+    return score + (titre.includes(mot) ? 1 : 0);
+  }, 0);
+
+  total -= motsIndesirables.reduce((score, mot) => {
+    return score + (titre.includes(mot) ? 2 : 0);
+  }, 0);
+
+  return total;
+};
 
   return score(b) - score(a);
 });
