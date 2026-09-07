@@ -102,21 +102,43 @@ function App() {
 
     try {
       const termeRecherche =
-        categorieRecherche && rechercheAUtiliser.trim()
-          ? `${categorieRecherche} ${rechercheAUtiliser} tutoriel`
-          : `${categorieRecherche || rechercheAUtiliser} tutoriel`;
+  categorieRecherche && rechercheAUtiliser.trim()
+    ? `${rechercheAUtiliser} ${categorieRecherche} tutoriel`
+    : `${categorieRecherche || rechercheAUtiliser} tutoriel`;
 
-      const response = await fetch(
-        `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(
-          termeRecherche
-        )}&type=video&maxResults=12&key=${import.meta.env.VITE_YOUTUBE_API_KEY}`
-      );
+     const response = await fetch(
+  `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(
+    termeRecherche
+  )}&type=video&order=relevance&maxResults=12&key=${import.meta.env.VITE_YOUTUBE_API_KEY}`
+);
 
       const data = await response.json();
 
       if (data.items && data.items.length > 0) {
-        setResultats(data.items);
-        setPageToken(data.nextPageToken || "");
+       const resultatsTries = [...data.items].sort((a, b) => {
+  const motsTutoriel = [
+    "tutoriel",
+    "comment",
+    "comment faire",
+    "guide",
+    "diy",
+    "étape",
+    "débutant",
+  ];
+
+  const score = (video) => {
+    const titre = video.snippet.title.toLowerCase();
+
+    return motsTutoriel.reduce((total, mot) => {
+      return total + (titre.includes(mot) ? 1 : 0);
+    }, 0);
+  };
+
+  return score(b) - score(a);
+});
+
+setResultats(resultatsTries);
+setPageToken(data.nextPageToken || "");
 
         setTimeout(() => {
           resultatsRef.current?.scrollIntoView({
