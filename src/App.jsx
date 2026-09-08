@@ -26,6 +26,8 @@ function App() {
   });
 
   const [afficherFavoris, setAfficherFavoris] = useState(false);
+  const [afficherRecentes, setAfficherRecentes] = useState(false);
+  const [menuOuvert, setMenuOuvert] = useState(false);
 
   const resultatsRef = useRef(null);
   const [pageToken, setPageToken] = useState("");
@@ -78,6 +80,7 @@ function App() {
     }
 
     setAfficherFavoris(false);
+    setAfficherRecentes(false);
 
     if (rechercheAUtiliser.trim() !== "") {
       setRecherche(rechercheAUtiliser);
@@ -102,69 +105,95 @@ function App() {
 
     try {
       const termeRecherche =
-  categorieRecherche && rechercheAUtiliser.trim()
-    ? `${rechercheAUtiliser} ${categorieRecherche} tutoriel`
-    : `${categorieRecherche || rechercheAUtiliser} tutoriel`;
+        categorieRecherche && rechercheAUtiliser.trim()
+          ? `${rechercheAUtiliser} ${categorieRecherche} tutoriel`
+          : `${categorieRecherche || rechercheAUtiliser} tutoriel`;
 
-     const response = await fetch(
-  `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(
-    termeRecherche
-  )}&type=video&order=relevance&maxResults=12&key=${import.meta.env.VITE_YOUTUBE_API_KEY}`
-);
+      const response = await fetch(
+        `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(
+          termeRecherche
+        )}&type=video&order=relevance&maxResults=12&key=${import.meta.env.VITE_YOUTUBE_API_KEY}`
+      );
 
       const data = await response.json();
 
       if (data.items && data.items.length > 0) {
-       const resultatsTries = [...data.items].sort((a, b) => {
-  const motsTutoriel = [
-    "tutoriel",
-    "comment",
-    "comment faire",
-    "guide",
-    "diy",
-    "étape",
-    "débutant",
-  ];
-  const motsIndesirables = [
-  "vlog",
-  "reaction",
-  "réaction",
-  "actualité",
-  "news",
-  "live",
-  "podcast",
-];
+        const resultatsTries = [...data.items].sort((a, b) => {
+          const motsTutoriel = [
+            "tutoriel",
+            "comment",
+            "comment faire",
+            "guide",
+            "diy",
+            "étape",
+            "débutant",
+          ];
 
-const score = (video) => {
-  const titre = video.snippet.title.toLowerCase();
-  const motsRecherche = rechercheAUtiliser
-    .toLowerCase()
-    .trim()
-    .split(/\s+/)
-    .filter((mot) => mot.length > 2);
+          const motsIndesirables = [
+            "vlog",
+            "reaction",
+            "réaction",
+            "actualité",
+            "news",
+            "live",
+            "podcast",
+          ];
 
-  let total = motsTutoriel.reduce((score, mot) => {
-    return score + (titre.includes(mot) ? 1 : 0);
-  }, 0);
+          const score = (video) => {
+            const titre = video.snippet.title.toLowerCase();
 
-  total -= motsIndesirables.reduce((score, mot) => {
-    return score + (titre.includes(mot) ? 2 : 0);
-  }, 0);
+            const motsIgnorer = [
+              "comment",
+              "pour",
+              "avec",
+              "dans",
+              "faire",
+              "une",
+              "des",
+              "les",
+              "sur",
+              "par",
+              "mon",
+              "ma",
+              "mes",
+              "du",
+              "de",
+              "et",
+              "ou",
+            ];
 
-  motsRecherche.forEach((mot) => {
-    if (titre.includes(mot)) {
-      total += 3;
-    }
-  });
+            const motsRecherche = rechercheAUtiliser
+              .toLowerCase()
+              .trim()
+              .split(/\s+/)
+              .filter(
+                (mot) =>
+                  mot.length > 2 &&
+                  !motsIgnorer.includes(mot)
+              );
 
-  return total;
-};
+            let total = motsTutoriel.reduce((score, mot) => {
+              return score + (titre.includes(mot) ? 1 : 0);
+            }, 0);
 
-  return score(b) - score(a);
-});
+            total -= motsIndesirables.reduce((score, mot) => {
+              return score + (titre.includes(mot) ? 2 : 0);
+            }, 0);
 
-setResultats(resultatsTries);
-setPageToken(data.nextPageToken || "");
+            motsRecherche.forEach((mot) => {
+              if (titre.includes(mot)) {
+                total += 3;
+              }
+            });
+
+            return total;
+          };
+
+          return score(b) - score(a);
+        });
+
+        setResultats(resultatsTries);
+        setPageToken(data.nextPageToken || "");
 
         setTimeout(() => {
           resultatsRef.current?.scrollIntoView({
@@ -180,9 +209,11 @@ setPageToken(data.nextPageToken || "");
       setChargement(false);
     } catch (error) {
       console.error("Erreur YouTube :", error);
+
       setErreur(
         "Impossible de récupérer les résultats. Réessaie."
       );
+
       setChargement(false);
     }
   };
@@ -219,6 +250,7 @@ setPageToken(data.nextPageToken || "");
         "Erreur chargement supplémentaire :",
         error
       );
+
       setChargement(false);
     }
   };
@@ -229,100 +261,107 @@ setPageToken(data.nextPageToken || "");
 
   return (
     <div className="app">
-      <h1 className="logo">TutoFind</h1>
 
-      <p>
-        Trouvez facilement des tutoriels vidéo sur tous les sujets.
-      </p>
+      <button
+        className="bouton-menu"
+        onClick={() => setMenuOuvert(!menuOuvert)}
+        aria-label="Ouvrir le menu"
+      >
+        ☰
+      </button>
 
-      <div className="search">
-        <input
-          type="text"
-          placeholder="Que cherchez-vous ?"
-          value={recherche}
-          onChange={(e) => setRecherche(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              lancerRecherche();
-            }
-          }}
-          spellCheck="false"
-        />
-
+      <nav
+        className={`menu-lateral ${
+          menuOuvert ? "ouvert" : ""
+        }`}
+      >
         <button
-          className="search-button"
-          onClick={() => lancerRecherche()}
+          onClick={() => {
+            setAfficherFavoris(false);
+            setAfficherRecentes(false);
+            setMenuOuvert(false);
+          }}
         >
-          Rechercher
+          🏠 Accueil
         </button>
 
-        <div className="mes-favoris">
-          <button
-            onClick={() =>
-              setAfficherFavoris(!afficherFavoris)
-            }
+        <button
+          onClick={() => {
+            setAfficherFavoris(true);
+            setAfficherRecentes(false);
+            setMenuOuvert(false);
+          }}
+        >
+          ⭐ Mes favoris
+        </button>
+
+        <button
+          onClick={() => {
+            setAfficherFavoris(false);
+            setAfficherRecentes(true);
+            setMenuOuvert(false);
+          }}
+        >
+          🕘 Recherches récentes
+        </button>
+
+        <button>
+          📁 Mes listes
+        </button>
+      </nav>
+
+      {afficherRecentes ? (
+        <>
+          <div
+            className="titre-resultats"
+            ref={resultatsRef}
           >
-            {afficherFavoris
-  ? "← Retour aux résultats"
-  : `⭐ Mes favoris (${favoris.length})`}
-          </button>
-        </div>
-      </div>
+            <h2>🕘 Recherches récentes</h2>
 
-      {recherchesRecentes.length > 0 &&
-        !afficherFavoris && (
-          <div className="recherches-recentes">
-            <span>Recherches récentes :</span>
-
-            {recherchesRecentes.map((item) => (
-              <button
-                key={item}
-                onClick={() => {
-                  setRecherche(item);
-                  lancerRecherche(item);
-                }}
-              >
-                {item}
-              </button>
-            ))}
+            <p>
+              {recherchesRecentes.length} recherche
+              {recherchesRecentes.length > 1
+                ? "s"
+                : ""} enregistrée
+              {recherchesRecentes.length > 1
+                ? "s"
+                : ""}
+            </p>
           </div>
-        )}
 
-      {!afficherFavoris && (
-        <div className="categories">
-          {categories.map((nom) => (
-            <button
-              key={nom}
-              onClick={() => {
-                const nouvelleCategorie =
-                  categorie === nom ? "" : nom;
+          {recherchesRecentes.length === 0 ? (
+            <div className="message-accueil">
+              <h2>Aucune recherche récente</h2>
 
-                setCategorie(nouvelleCategorie);
-                setResultats([]);
-                setErreur("");
-
-                lancerRecherche(
-                  recherche,
-                  nouvelleCategorie
-                );
-              }}
-              className={
-                categorie === nom ? "active" : ""
-              }
-            >
-              {nom}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {afficherFavoris ? (
+              <p>
+                Vos recherches apparaîtront ici.
+              </p>
+            </div>
+          ) : (
+            <div className="recherches-recentes menu-recherches">
+              {recherchesRecentes.map((item) => (
+                <button
+                  key={item}
+                  onClick={() => {
+                    setRecherche(item);
+                    setAfficherRecentes(false);
+                    lancerRecherche(item);
+                  }}
+                >
+                  🔎 {item}
+                </button>
+              ))}
+            </div>
+          )}
+        </>
+      ) : afficherFavoris ? (
         <>
           <div
             className="titre-resultats"
             ref={resultatsRef}
           >
             <h2>⭐ Mes favoris</h2>
+
             <p>
               {favoris.length}{" "}
               {favoris.length > 1
@@ -333,24 +372,134 @@ setPageToken(data.nextPageToken || "");
 
           {favoris.length === 0 && (
             <div className="message-accueil">
-              <h2>Aucun favori pour le moment</h2>
+              <h2>
+                Aucun favori pour le moment
+              </h2>
+
               <p>
-                Ajoutez des tutoriels à vos favoris avec
-                l'étoile ⭐.
+                Ajoutez des tutoriels à vos favoris
+                avec l'étoile ⭐.
               </p>
             </div>
           )}
         </>
       ) : (
         <>
+          <h1 className="logo">
+            TutoFind
+          </h1>
+
+          <p>
+            Trouvez facilement des tutoriels vidéo
+            sur tous les sujets.
+          </p>
+
+          <div className="search">
+            <input
+              type="text"
+              placeholder="Que cherchez-vous ?"
+              value={recherche}
+              onChange={(e) =>
+                setRecherche(e.target.value)
+              }
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  lancerRecherche();
+                }
+              }}
+              spellCheck="false"
+            />
+
+            <button
+              className="search-button"
+              onClick={() =>
+                lancerRecherche()
+              }
+            >
+              Rechercher
+            </button>
+
+            <div className="mes-favoris">
+              <button
+                onClick={() =>
+                  setAfficherFavoris(
+                    !afficherFavoris
+                  )
+                }
+              >
+                {afficherFavoris
+                  ? "← Retour aux résultats"
+                  : `⭐ Mes favoris (${favoris.length})`}
+              </button>
+            </div>
+          </div>
+
+          {recherchesRecentes.length > 0 && (
+            <div className="recherches-recentes">
+              <span>
+                Recherches récentes :
+              </span>
+
+              {recherchesRecentes.map(
+                (item) => (
+                  <button
+                    key={item}
+                    onClick={() => {
+                      setRecherche(item);
+                      lancerRecherche(item);
+                    }}
+                  >
+                    {item}
+                  </button>
+                )
+              )}
+            </div>
+          )}
+
+          <div className="categories">
+            {categories.map((nom) => (
+              <button
+                key={nom}
+                onClick={() => {
+                  const nouvelleCategorie =
+                    categorie === nom
+                      ? ""
+                      : nom;
+
+                  setCategorie(
+                    nouvelleCategorie
+                  );
+
+                  setResultats([]);
+                  setErreur("");
+
+                  lancerRecherche(
+                    recherche,
+                    nouvelleCategorie
+                  );
+                }}
+                className={
+                  categorie === nom
+                    ? "active"
+                    : ""
+                }
+              >
+                {nom}
+              </button>
+            ))}
+          </div>
+
           {categorie && (
             <p>
-              Catégorie sélectionnée : {categorie}
+              Catégorie sélectionnée :{" "}
+              {categorie}
             </p>
           )}
 
           {chargement && (
-            <p>Recherche en cours...</p>
+            <p>
+              Recherche en cours...
+            </p>
           )}
 
           {!chargement &&
@@ -358,16 +507,20 @@ setPageToken(data.nextPageToken || "");
             resultats.length === 0 && (
               <div className="message-accueil">
                 <h2>
-                  Que voulez-vous apprendre aujourd'hui ?
+                  Que voulez-vous apprendre
+                  aujourd'hui ?
                 </h2>
+
                 <p>
-                  Recherchez un tutoriel ou choisissez une
-                  catégorie.
+                  Recherchez un tutoriel ou
+                  choisissez une catégorie.
                 </p>
               </div>
             )}
 
-          {erreur && <p>{erreur}</p>}
+          {erreur && (
+            <p>{erreur}</p>
+          )}
 
           {resultats.length > 0 && (
             <div
@@ -375,10 +528,13 @@ setPageToken(data.nextPageToken || "");
               ref={resultatsRef}
             >
               <h2>
-                Résultats pour : {recherche}
+                Résultats pour :{" "}
+                {recherche}
               </h2>
+
               <p>
-                {resultats.length} résultats trouvés
+                {resultats.length} résultats
+                trouvés
               </p>
             </div>
           )}
@@ -387,101 +543,121 @@ setPageToken(data.nextPageToken || "");
 
       {videosAffichees.length > 0 && (
         <div className="resultats">
-          {videosAffichees.map((resultat) => {
-            const estFavori = favoris.some(
-              (favori) =>
-                favori.id.videoId ===
-                resultat.id.videoId
-            );
+          {videosAffichees.map(
+            (resultat) => {
+              const estFavori =
+                favoris.some(
+                  (favori) =>
+                    favori.id.videoId ===
+                    resultat.id.videoId
+                );
 
-            return (
-              <div
-                className="resultat"
-                key={resultat.id.videoId}
-              >
-                <div className="image-resultat">
-                  <img
-                    src={
-                      resultat.snippet.thumbnails.medium.url
-                    }
-                    alt={resultat.snippet.title}
-                  />
-
-                  <span className="badge-tutoriel">
-                    TUTORIEL
-                  </span>
-
-                  <button
-                    className={`bouton-favori ${
-                      estFavori
-                        ? "favori-actif"
-                        : ""
-                    }`}
-                    onClick={() =>
-                      gererFavori(resultat)
-                    }
-                    aria-label={
-                      estFavori
-                        ? "Retirer des favoris"
-                        : "Ajouter aux favoris"
-                    }
-                  >
-                    {estFavori ? "★" : "☆"}
-                  </button>
-                </div>
-
-                <h3>
-                  {resultat.snippet.title}
-                </h3>
-
-                <small>
-                  <span className="chaine">
-                    {resultat.snippet.channelTitle}
-                  </span>
-
-                  <span className="date-video">
-                    {" "}
-                    ·{" "}
-                    {new Date(
-                      resultat.snippet.publishedAt
-                    ).toLocaleDateString("fr-FR")}
-                  </span>
-                </small>
-
-                <p>
-                  {resultat.snippet.description.length >
-                  120
-                    ? resultat.snippet.description.substring(
-                        0,
-                        120
-                      ) + "..."
-                    : resultat.snippet.description}
-                </p>
-
-                <a
-                  href={`https://www.youtube.com/watch?v=${resultat.id.videoId}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
+              return (
+                <div
+                  className="resultat"
+                  key={resultat.id.videoId}
                 >
-                  Voir le tutoriel
-                </a>
-              </div>
-            );
-          })}
+                  <div className="image-resultat">
+                    <img
+                      src={
+                        resultat.snippet
+                          .thumbnails.medium.url
+                      }
+                      alt={
+                        resultat.snippet.title
+                      }
+                    />
+
+                    <span className="badge-tutoriel">
+                      TUTORIEL
+                    </span>
+
+                    <button
+                      className={`bouton-favori ${
+                        estFavori
+                          ? "favori-actif"
+                          : ""
+                      }`}
+                      onClick={() =>
+                        gererFavori(
+                          resultat
+                        )
+                      }
+                      aria-label={
+                        estFavori
+                          ? "Retirer des favoris"
+                          : "Ajouter aux favoris"
+                      }
+                    >
+                      {estFavori
+                        ? "★"
+                        : "☆"}
+                    </button>
+                  </div>
+
+                  <h3>
+                    {resultat.snippet.title}
+                  </h3>
+
+                  <small>
+                    <span className="chaine">
+                      {
+                        resultat.snippet
+                          .channelTitle
+                      }
+                    </span>
+
+                    <span className="date-video">
+                      {" "}
+                      ·{" "}
+                      {new Date(
+                        resultat.snippet
+                          .publishedAt
+                      ).toLocaleDateString(
+                        "fr-FR"
+                      )}
+                    </span>
+                  </small>
+
+                  <p>
+                    {resultat.snippet
+                      .description.length >
+                    120
+                      ? resultat.snippet.description.substring(
+                          0,
+                          120
+                        ) + "..."
+                      : resultat.snippet
+                          .description}
+                  </p>
+
+                  <a
+                    href={`https://www.youtube.com/watch?v=${resultat.id.videoId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Voir le tutoriel
+                  </a>
+                </div>
+              );
+            }
+          )}
         </div>
       )}
 
-      {!afficherFavoris && pageToken && (
-        <button
-          className="voir-plus"
-          onClick={chargerPlus}
-          disabled={chargement}
-        >
-          {chargement
-            ? "Chargement..."
-            : "Voir plus"}
-        </button>
-      )}
+      {!afficherFavoris &&
+        !afficherRecentes &&
+        pageToken && (
+          <button
+            className="voir-plus"
+            onClick={chargerPlus}
+            disabled={chargement}
+          >
+            {chargement
+              ? "Chargement..."
+              : "Voir plus"}
+          </button>
+        )}
     </div>
   );
 }
