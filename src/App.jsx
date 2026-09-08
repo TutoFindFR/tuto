@@ -25,12 +25,27 @@ function App() {
       : [];
   });
 
+  // Listes
+  const [listes, setListes] = useState(() => {
+    const listesSauvegardees =
+      localStorage.getItem("listes");
+
+    return listesSauvegardees
+      ? JSON.parse(listesSauvegardees)
+      : [];
+  });
+
   const [afficherFavoris, setAfficherFavoris] = useState(false);
   const [afficherRecentes, setAfficherRecentes] = useState(false);
+  const [afficherListes, setAfficherListes] = useState(false);
   const [menuOuvert, setMenuOuvert] = useState(false);
 
   const resultatsRef = useRef(null);
   const [pageToken, setPageToken] = useState("");
+
+  // Création d'une liste
+  const [creerListeOuvert, setCreerListeOuvert] = useState(false);
+  const [nomNouvelleListe, setNomNouvelleListe] = useState("");
 
   useEffect(() => {
     localStorage.setItem(
@@ -40,8 +55,18 @@ function App() {
   }, [recherchesRecentes]);
 
   useEffect(() => {
-    localStorage.setItem("favoris", JSON.stringify(favoris));
+    localStorage.setItem(
+      "favoris",
+      JSON.stringify(favoris)
+    );
   }, [favoris]);
+
+  useEffect(() => {
+    localStorage.setItem(
+      "listes",
+      JSON.stringify(listes)
+    );
+  }, [listes]);
 
   const categories = [
     "Maison",
@@ -55,12 +80,14 @@ function App() {
   const gererFavori = (video) => {
     setFavoris((anciensFavoris) => {
       const dejaFavori = anciensFavoris.some(
-        (favori) => favori.id.videoId === video.id.videoId
+        (favori) =>
+          favori.id.videoId === video.id.videoId
       );
 
       if (dejaFavori) {
         return anciensFavoris.filter(
-          (favori) => favori.id.videoId !== video.id.videoId
+          (favori) =>
+            favori.id.videoId !== video.id.videoId
         );
       }
 
@@ -68,11 +95,52 @@ function App() {
     });
   };
 
+  // Créer une liste
+  const creerListe = () => {
+    if (nomNouvelleListe.trim() === "") {
+      return;
+    }
+
+    const nouvelleListe = {
+      id: Date.now(),
+      nom: nomNouvelleListe.trim(),
+      videos: [],
+    };
+
+    setListes((anciennesListes) => [
+      ...anciennesListes,
+      nouvelleListe,
+    ]);
+
+    setNomNouvelleListe("");
+    setCreerListeOuvert(false);
+  };
+
+  // Supprimer une liste
+  const supprimerListe = (id) => {
+    const confirmation = window.confirm(
+      "Voulez-vous vraiment supprimer cette liste ?"
+    );
+
+    if (!confirmation) {
+      return;
+    }
+
+    setListes((anciennesListes) =>
+      anciennesListes.filter(
+        (liste) => liste.id !== id
+      )
+    );
+  };
+
   const lancerRecherche = async (
     rechercheAUtiliser = recherche,
     categorieRecherche = categorie
   ) => {
-    if (rechercheAUtiliser.trim() === "" && !categorieRecherche) {
+    if (
+      rechercheAUtiliser.trim() === "" &&
+      !categorieRecherche
+    ) {
       setErreur(
         "Choisis une catégorie ou écris quelque chose à rechercher."
       );
@@ -81,12 +149,14 @@ function App() {
 
     setAfficherFavoris(false);
     setAfficherRecentes(false);
+    setAfficherListes(false);
 
     if (rechercheAUtiliser.trim() !== "") {
       setRecherche(rechercheAUtiliser);
 
       setRecherchesRecentes((anciennes) => {
-        const nouvelleRecherche = rechercheAUtiliser.trim();
+        const nouvelleRecherche =
+          rechercheAUtiliser.trim();
 
         const nouvelles = [
           nouvelleRecherche,
@@ -105,7 +175,8 @@ function App() {
 
     try {
       const termeRecherche =
-        categorieRecherche && rechercheAUtiliser.trim()
+        categorieRecherche &&
+        rechercheAUtiliser.trim()
           ? `${rechercheAUtiliser} ${categorieRecherche} tutoriel`
           : `${categorieRecherche || rechercheAUtiliser} tutoriel`;
 
@@ -118,79 +189,95 @@ function App() {
       const data = await response.json();
 
       if (data.items && data.items.length > 0) {
-        const resultatsTries = [...data.items].sort((a, b) => {
-          const motsTutoriel = [
-            "tutoriel",
-            "comment",
-            "comment faire",
-            "guide",
-            "diy",
-            "étape",
-            "débutant",
-          ];
-
-          const motsIndesirables = [
-            "vlog",
-            "reaction",
-            "réaction",
-            "actualité",
-            "news",
-            "live",
-            "podcast",
-          ];
-
-          const score = (video) => {
-            const titre = video.snippet.title.toLowerCase();
-
-            const motsIgnorer = [
+        const resultatsTries = [...data.items].sort(
+          (a, b) => {
+            const motsTutoriel = [
+              "tutoriel",
               "comment",
-              "pour",
-              "avec",
-              "dans",
-              "faire",
-              "une",
-              "des",
-              "les",
-              "sur",
-              "par",
-              "mon",
-              "ma",
-              "mes",
-              "du",
-              "de",
-              "et",
-              "ou",
+              "comment faire",
+              "guide",
+              "diy",
+              "étape",
+              "débutant",
             ];
 
-            const motsRecherche = rechercheAUtiliser
-              .toLowerCase()
-              .trim()
-              .split(/\s+/)
-              .filter(
-                (mot) =>
-                  mot.length > 2 &&
-                  !motsIgnorer.includes(mot)
+            const motsIndesirables = [
+              "vlog",
+              "reaction",
+              "réaction",
+              "actualité",
+              "news",
+              "live",
+              "podcast",
+            ];
+
+            const score = (video) => {
+              const titre =
+                video.snippet.title.toLowerCase();
+
+              const motsIgnorer = [
+                "comment",
+                "pour",
+                "avec",
+                "dans",
+                "faire",
+                "une",
+                "des",
+                "les",
+                "sur",
+                "par",
+                "mon",
+                "ma",
+                "mes",
+                "du",
+                "de",
+                "et",
+                "ou",
+              ];
+
+              const motsRecherche =
+                rechercheAUtiliser
+                  .toLowerCase()
+                  .trim()
+                  .split(/\s+/)
+                  .filter(
+                    (mot) =>
+                      mot.length > 2 &&
+                      !motsIgnorer.includes(mot)
+                  );
+
+              let total = motsTutoriel.reduce(
+                (score, mot) => {
+                  return (
+                    score +
+                    (titre.includes(mot) ? 1 : 0)
+                  );
+                },
+                0
               );
 
-            let total = motsTutoriel.reduce((score, mot) => {
-              return score + (titre.includes(mot) ? 1 : 0);
-            }, 0);
+              total -= motsIndesirables.reduce(
+                (score, mot) => {
+                  return (
+                    score +
+                    (titre.includes(mot) ? 2 : 0)
+                  );
+                },
+                0
+              );
 
-            total -= motsIndesirables.reduce((score, mot) => {
-              return score + (titre.includes(mot) ? 2 : 0);
-            }, 0);
+              motsRecherche.forEach((mot) => {
+                if (titre.includes(mot)) {
+                  total += 3;
+                }
+              });
 
-            motsRecherche.forEach((mot) => {
-              if (titre.includes(mot)) {
-                total += 3;
-              }
-            });
+              return total;
+            };
 
-            return total;
-          };
-
-          return score(b) - score(a);
-        });
+            return score(b) - score(a);
+          }
+        );
 
         setResultats(resultatsTries);
         setPageToken(data.nextPageToken || "");
@@ -202,7 +289,9 @@ function App() {
           });
         }, 100);
       } else {
-        setErreur("Aucun résultat trouvé pour cette recherche.");
+        setErreur(
+          "Aucun résultat trouvé pour cette recherche."
+        );
         setPageToken("");
       }
 
@@ -255,9 +344,12 @@ function App() {
     }
   };
 
-  const videosAffichees = afficherFavoris
-    ? favoris
-    : resultats;
+  const videosAffichees =
+    afficherFavoris
+      ? favoris
+      : afficherRecentes || afficherListes
+      ? []
+      : resultats;
 
   return (
     <div className="app">
@@ -279,6 +371,7 @@ function App() {
           onClick={() => {
             setAfficherFavoris(false);
             setAfficherRecentes(false);
+            setAfficherListes(false);
             setMenuOuvert(false);
           }}
         >
@@ -289,6 +382,7 @@ function App() {
           onClick={() => {
             setAfficherFavoris(true);
             setAfficherRecentes(false);
+            setAfficherListes(false);
             setMenuOuvert(false);
           }}
         >
@@ -299,18 +393,154 @@ function App() {
           onClick={() => {
             setAfficherFavoris(false);
             setAfficherRecentes(true);
+            setAfficherListes(false);
             setMenuOuvert(false);
           }}
         >
           🕘 Recherches récentes
         </button>
 
-        <button>
+        <button
+          onClick={() => {
+            setAfficherFavoris(false);
+            setAfficherRecentes(false);
+            setAfficherListes(true);
+            setMenuOuvert(false);
+          }}
+        >
           📁 Mes listes
         </button>
       </nav>
 
-      {afficherRecentes ? (
+      {afficherListes ? (
+        <>
+          <div
+            className="titre-resultats"
+            ref={resultatsRef}
+          >
+            <h2>📁 Mes listes</h2>
+
+            <p>
+              Organisez vos tutoriels comme vous le souhaitez.
+            </p>
+          </div>
+
+          <div className="message-accueil">
+
+            <button
+              className="search-button"
+              onClick={() =>
+                setCreerListeOuvert(true)
+              }
+            >
+              ➕ Créer une liste
+            </button>
+
+            {creerListeOuvert && (
+              <div
+                style={{
+                  marginTop: "25px",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: "15px",
+                }}
+              >
+                <input
+                  type="text"
+                  placeholder="Nom de votre liste"
+                  value={nomNouvelleListe}
+                  onChange={(e) =>
+                    setNomNouvelleListe(
+                      e.target.value
+                    )
+                  }
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      creerListe();
+                    }
+                  }}
+                  autoFocus
+                  style={{
+                    width: "280px",
+                    padding: "12px",
+                    border: "1px solid #ccc",
+                    borderRadius: "8px",
+                    fontSize: "16px",
+                    boxSizing: "border-box",
+                  }}
+                />
+
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "12px",
+                    justifyContent: "center",
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <button
+                    className="search-button"
+                    onClick={creerListe}
+                  >
+                    Créer
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setCreerListeOuvert(false);
+                      setNomNouvelleListe("");
+                    }}
+                  >
+                    Annuler
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {listes.length === 0 ? (
+            <div className="message-accueil">
+              <h2>
+                Aucune liste pour le moment
+              </h2>
+
+              <p>
+                Créez votre première liste pour organiser
+                vos tutoriels.
+              </p>
+            </div>
+          ) : (
+            <div className="listes-container">
+              {listes.map((liste) => (
+                <div
+                  className="liste-card"
+                  key={liste.id}
+                >
+                  <h3>
+                    📁 {liste.nom}
+                  </h3>
+
+                  <p>
+                    {liste.videos.length} tutoriel
+                    {liste.videos.length > 1
+                      ? "s"
+                      : ""}
+                  </p>
+
+                  <button
+                    onClick={() =>
+                      supprimerListe(liste.id)
+                    }
+                  >
+                    🗑️ Supprimer
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
+      ) : afficherRecentes ? (
         <>
           <div
             className="titre-resultats"
@@ -322,7 +552,8 @@ function App() {
               {recherchesRecentes.length} recherche
               {recherchesRecentes.length > 1
                 ? "s"
-                : ""} enregistrée
+                : ""}{" "}
+              enregistrée
               {recherchesRecentes.length > 1
                 ? "s"
                 : ""}
@@ -331,7 +562,9 @@ function App() {
 
           {recherchesRecentes.length === 0 ? (
             <div className="message-accueil">
-              <h2>Aucune recherche récente</h2>
+              <h2>
+                Aucune recherche récente
+              </h2>
 
               <p>
                 Vos recherches apparaîtront ici.
@@ -412,20 +645,20 @@ function App() {
 
             <button
               className="search-button"
-              onClick={() =>
-                lancerRecherche()
-              }
+              onClick={() => lancerRecherche()}
             >
               Rechercher
             </button>
 
             <div className="mes-favoris">
               <button
-                onClick={() =>
+                onClick={() => {
                   setAfficherFavoris(
                     !afficherFavoris
-                  )
-                }
+                  );
+                  setAfficherRecentes(false);
+                  setAfficherListes(false);
+                }}
               >
                 {afficherFavoris
                   ? "← Retour aux résultats"
@@ -440,19 +673,17 @@ function App() {
                 Recherches récentes :
               </span>
 
-              {recherchesRecentes.map(
-                (item) => (
-                  <button
-                    key={item}
-                    onClick={() => {
-                      setRecherche(item);
-                      lancerRecherche(item);
-                    }}
-                  >
-                    {item}
-                  </button>
-                )
-              )}
+              {recherchesRecentes.map((item) => (
+                <button
+                  key={item}
+                  onClick={() => {
+                    setRecherche(item);
+                    lancerRecherche(item);
+                  }}
+                >
+                  {item}
+                </button>
+              ))}
             </div>
           )}
 
@@ -469,7 +700,6 @@ function App() {
                   setCategorie(
                     nouvelleCategorie
                   );
-
                   setResultats([]);
                   setErreur("");
 
@@ -543,110 +773,104 @@ function App() {
 
       {videosAffichees.length > 0 && (
         <div className="resultats">
-          {videosAffichees.map(
-            (resultat) => {
-              const estFavori =
-                favoris.some(
-                  (favori) =>
-                    favori.id.videoId ===
-                    resultat.id.videoId
-                );
-
-              return (
-                <div
-                  className="resultat"
-                  key={resultat.id.videoId}
-                >
-                  <div className="image-resultat">
-                    <img
-                      src={
-                        resultat.snippet
-                          .thumbnails.medium.url
-                      }
-                      alt={
-                        resultat.snippet.title
-                      }
-                    />
-
-                    <span className="badge-tutoriel">
-                      TUTORIEL
-                    </span>
-
-                    <button
-                      className={`bouton-favori ${
-                        estFavori
-                          ? "favori-actif"
-                          : ""
-                      }`}
-                      onClick={() =>
-                        gererFavori(
-                          resultat
-                        )
-                      }
-                      aria-label={
-                        estFavori
-                          ? "Retirer des favoris"
-                          : "Ajouter aux favoris"
-                      }
-                    >
-                      {estFavori
-                        ? "★"
-                        : "☆"}
-                    </button>
-                  </div>
-
-                  <h3>
-                    {resultat.snippet.title}
-                  </h3>
-
-                  <small>
-                    <span className="chaine">
-                      {
-                        resultat.snippet
-                          .channelTitle
-                      }
-                    </span>
-
-                    <span className="date-video">
-                      {" "}
-                      ·{" "}
-                      {new Date(
-                        resultat.snippet
-                          .publishedAt
-                      ).toLocaleDateString(
-                        "fr-FR"
-                      )}
-                    </span>
-                  </small>
-
-                  <p>
-                    {resultat.snippet
-                      .description.length >
-                    120
-                      ? resultat.snippet.description.substring(
-                          0,
-                          120
-                        ) + "..."
-                      : resultat.snippet
-                          .description}
-                  </p>
-
-                  <a
-                    href={`https://www.youtube.com/watch?v=${resultat.id.videoId}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Voir le tutoriel
-                  </a>
-                </div>
+          {videosAffichees.map((resultat) => {
+            const estFavori =
+              favoris.some(
+                (favori) =>
+                  favori.id.videoId ===
+                  resultat.id.videoId
               );
-            }
-          )}
+
+            return (
+              <div
+                className="resultat"
+                key={resultat.id.videoId}
+              >
+                <div className="image-resultat">
+                  <img
+                    src={
+                      resultat.snippet
+                        .thumbnails.medium.url
+                    }
+                    alt={
+                      resultat.snippet.title
+                    }
+                  />
+
+                  <span className="badge-tutoriel">
+                    TUTORIEL
+                  </span>
+
+                  <button
+                    className={`bouton-favori ${
+                      estFavori
+                        ? "favori-actif"
+                        : ""
+                    }`}
+                    onClick={() =>
+                      gererFavori(resultat)
+                    }
+                    aria-label={
+                      estFavori
+                        ? "Retirer des favoris"
+                        : "Ajouter aux favoris"
+                    }
+                  >
+                    {estFavori
+                      ? "★"
+                      : "☆"}
+                  </button>
+                </div>
+
+                <h3>
+                  {resultat.snippet.title}
+                </h3>
+
+                <small>
+                  <span className="chaine">
+                    {
+                      resultat.snippet
+                        .channelTitle
+                    }
+                  </span>
+
+                  <span className="date-video">
+                    {" "}
+                    ·{" "}
+                    {new Date(
+                      resultat.snippet.publishedAt
+                    ).toLocaleDateString(
+                      "fr-FR"
+                    )}
+                  </span>
+                </small>
+
+                <p>
+                  {resultat.snippet.description
+                    .length > 120
+                    ? resultat.snippet.description.substring(
+                        0,
+                        120
+                      ) + "..."
+                    : resultat.snippet.description}
+                </p>
+
+                <a
+                  href={`https://www.youtube.com/watch?v=${resultat.id.videoId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Voir le tutoriel
+                </a>
+              </div>
+            );
+          })}
         </div>
       )}
 
       {!afficherFavoris &&
         !afficherRecentes &&
+        !afficherListes &&
         pageToken && (
           <button
             className="voir-plus"
