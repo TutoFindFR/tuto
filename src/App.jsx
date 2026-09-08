@@ -137,6 +137,11 @@ function App() {
 
 const score = (video) => {
   const titre = video.snippet.title.toLowerCase();
+  const motsRecherche = rechercheAUtiliser
+    .toLowerCase()
+    .trim()
+    .split(/\s+/)
+    .filter((mot) => mot.length > 2);
 
   let total = motsTutoriel.reduce((score, mot) => {
     return score + (titre.includes(mot) ? 1 : 0);
@@ -145,6 +150,12 @@ const score = (video) => {
   total -= motsIndesirables.reduce((score, mot) => {
     return score + (titre.includes(mot) ? 2 : 0);
   }, 0);
+
+  motsRecherche.forEach((mot) => {
+    if (titre.includes(mot)) {
+      total += 3;
+    }
+  });
 
   return total;
 };
