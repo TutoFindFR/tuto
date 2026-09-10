@@ -681,19 +681,30 @@ button:hover {
   position: fixed;
   top: 20px;
   right: 20px;
-  z-index: 20;
-  width: 42px;
-  height: 42px;
+  z-index: 1002;
+
+  width: 38px;
+  height: 38px;
+  padding: 0;
+
   border: none;
-  border-radius: 50%;
+  border-radius: 8px;
+
   background: #ff4d00;
-  color: #111;
-  font-size: 28px;
-  line-height: 1;
+  color: white;
+
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 38px;
+  text-align: center;
+
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-padding-top: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+
+  transition: all 0.2s ease;
+}
+
+.back-home-button:hover {
+  background: #e64300;
+  transform: translateY(-1px);
 }
