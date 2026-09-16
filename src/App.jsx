@@ -530,64 +530,81 @@ function App() {
           <p>Trouvez facilement des tutoriels vidéo sur tous les sujets.</p>
 
           <div
-            className="search"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <input
-              type="text"
-              placeholder="Que cherchez-vous ?"
-              value={recherche}
-              onChange={(e) => setRecherche(e.target.value)}
-              onFocus={() => {
-                if (recherchesRecentes.length > 0) {
-                  setRecherchesOuvertes(true);
-                }
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") lancerRecherche();
-              }}
-              spellCheck="false"
-            />
+  className="search"
+  onClick={(e) => e.stopPropagation()}
+>
+  <input
+    type="text"
+    placeholder="Que cherchez-vous ?"
+    value={recherche}
+    onChange={(e) => {
+      setRecherche(e.target.value);
+      setRecherchesOuvertes(false);
+    }}
+    onFocus={() => {
+      if (recherchesRecentes.length > 0 && recherche.trim() === "") {
+        setRecherchesOuvertes(true);
+      }
+    }}
+    onKeyDown={(e) => {
+      if (e.key === "Enter") {
+        setRecherchesOuvertes(false);
+        lancerRecherche();
+      }
+    }}
+    spellCheck="false"
+  />
 
-            {recherchesOuvertes && recherchesRecentes.length > 0 && (
-              <div className="recherches-recentes-dropdown">
-                {recherchesRecentes.map((item) => (
-                  <button
-                    key={item}
-                    onClick={() => {
-                      setRecherche(item);
-                      setRecherchesOuvertes(false);
-                      lancerRecherche(item);
-                    }}
-                  >
-                    🔎 {item}
-                  </button>
-                ))}
-              </div>
-            )}
+  {recherchesOuvertes && recherchesRecentes.length > 0 && (
+    <div
+      className="recherches-recentes-dropdown"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="recherches-recentes-titre">
+        Recherches récentes
+      </div>
 
-            <button
-              className="search-button"
-              onClick={() => lancerRecherche()}
-            >
-              Rechercher
-            </button>
+      {recherchesRecentes.map((item) => (
+        <button
+          key={item}
+          onClick={() => {
+            setRecherche(item);
+            setRecherchesOuvertes(false);
+            lancerRecherche(item);
+          }}
+        >
+          <span className="icone-recherche">🕘</span>
+          <span className="texte-recherche">{item}</span>
+        </button>
+      ))}
+    </div>
+  )}
 
-            <div className="mes-favoris">
-              <button
-                onClick={() => {
-                  setAfficherFavoris(!afficherFavoris);
-                  setAfficherRecentes(false);
-                  setAfficherListes(false);
-                  setRecherchesOuvertes(false);
-                }}
-              >
-                {afficherFavoris
-                  ? "← Retour aux résultats"
-                  : `⭐ Mes favoris (${favoris.length})`}
-              </button>
-            </div>
-          </div>
+  <button
+    className="search-button"
+    onClick={() => {
+      setRecherchesOuvertes(false);
+      lancerRecherche();
+    }}
+  >
+    Rechercher
+  </button>
+
+  <div className="mes-favoris">
+    <button
+      onClick={() => {
+        setAfficherFavoris(!afficherFavoris);
+        setAfficherRecentes(false);
+        setAfficherListes(false);
+        setRecherchesOuvertes(false);
+      }}
+    >
+      {afficherFavoris
+        ? "← Retour aux résultats"
+        : `⭐ Mes favoris (${favoris.length})`}
+    </button>
+  </div>
+</div>
 
           <div className="categories">
             {categories.map((nom) => (
