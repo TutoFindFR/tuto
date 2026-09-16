@@ -660,71 +660,87 @@ function App() {
       )}
 
       {videosAffichees.length > 0 && (
-        <div className="resultats">
-          {videosAffichees.map((resultat) => {
-            const estFavori = favoris.some(
-              (favori) => favori.id.videoId === resultat.id.videoId
-            );
+  <div className="resultats">
+    {videosAffichees.map((resultat) => {
+      const estFavori = favoris.some(
+        (favori) => favori.id.videoId === resultat.id.videoId
+      );
 
-            return (
-              <div className="resultat" key={resultat.id.videoId}>
-                <div className="image-resultat">
-                  <img
-                    src={resultat.snippet.thumbnails.medium.url}
-                    alt={resultat.snippet.title}
-                  />
+      const ouvrirTutoriel = () => {
+        window.open(
+          `https://www.youtube.com/watch?v=${resultat.id.videoId}`,
+          "_blank"
+        );
+      };
 
-                  <span className="badge-tutoriel">TUTORIEL</span>
+      return (
+        <div
+          className="resultat"
+          key={resultat.id.videoId}
+          onClick={ouvrirTutoriel}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              ouvrirTutoriel();
+            }
+          }}
+        >
+          <div className="image-resultat">
+            <img
+              src={resultat.snippet.thumbnails.medium.url}
+              alt={resultat.snippet.title}
+            />
 
-                  <button
-                    className={`bouton-favori ${
-                      estFavori ? "favori-actif" : ""
-                    }`}
-                    onClick={() => gererFavori(resultat)}
-                    aria-label={
-                      estFavori
-                        ? "Retirer des favoris"
-                        : "Ajouter aux favoris"
-                    }
-                  >
-                    {estFavori ? "★" : "☆"}
-                  </button>
-                </div>
+            <span className="badge-tutoriel">
+              TUTORIEL
+            </span>
 
-                <h3>{resultat.snippet.title}</h3>
+            <button
+              className={`bouton-favori ${
+                estFavori ? "favori-actif" : ""
+              }`}
+              onClick={(e) => {
+                e.stopPropagation();
+                gererFavori(resultat);
+              }}
+              aria-label={
+                estFavori
+                  ? "Retirer des favoris"
+                  : "Ajouter aux favoris"
+              }
+            >
+              {estFavori ? "★" : "☆"}
+            </button>
+          </div>
 
-                <small>
-                  <span className="chaine">
-                    {resultat.snippet.channelTitle}
-                  </span>
+          <h3>{resultat.snippet.title}</h3>
 
-                  <span className="date-video">
-                    {" "}
-                    ·{" "}
-                    {new Date(
-                      resultat.snippet.publishedAt
-                    ).toLocaleDateString("fr-FR")}
-                  </span>
-                </small>
+          <small>
+            <span className="chaine">
+              {resultat.snippet.channelTitle}
+            </span>
 
-                <p>
-                  {resultat.snippet.description.length > 120
-                    ? resultat.snippet.description.substring(0, 120) + "..."
-                    : resultat.snippet.description}
-                </p>
+            <span className="date-video">
+              {" "}
+              ·{" "}
+              {new Date(
+                resultat.snippet.publishedAt
+              ).toLocaleDateString("fr-FR")}
+            </span>
+          </small>
 
-                <a
-                  href={`https://www.youtube.com/watch?v=${resultat.id.videoId}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Voir le tutoriel
-                </a>
-              </div>
-            );
-          })}
+          <p>
+            {resultat.snippet.description.length > 120
+              ? resultat.snippet.description.substring(0, 120) + "..."
+              : resultat.snippet.description}
+          </p>
         </div>
-      )}
+      );
+    })}
+  </div>
+)}
 
       {!afficherFavoris &&
         !afficherRecentes &&
