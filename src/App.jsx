@@ -7,10 +7,13 @@ function App() {
   const [recherche, setRecherche] = useState("");
   const [categorie, setCategorie] = useState("");
   const [resultats, setResultats] = useState([]);
+  const [recherchesOuvertes, setRecherchesOuvertes] = useState(false);
 
   const [recherchesRecentes, setRecherchesRecentes] = useState(() => {
     const recherchesSauvegardees = localStorage.getItem("recherchesRecentes");
-    return recherchesSauvegardees ? JSON.parse(recherchesSauvegardees) : [];
+    return recherchesSauvegardees
+      ? JSON.parse(recherchesSauvegardees)
+      : [];
   });
 
   const [favoris, setFavoris] = useState(() => {
@@ -42,6 +45,24 @@ function App() {
   }, [recherchesRecentes]);
 
   useEffect(() => {
+    const categoriesAccueil = [
+      "Maison",
+      "Bricolage",
+      "Cuisine",
+      "Jardin",
+      "Auto",
+      "Informatique",
+    ];
+
+    const categorieAleatoire =
+      categoriesAccueil[
+        Math.floor(Math.random() * categoriesAccueil.length)
+      ];
+
+    lancerRecherche("", categorieAleatoire);
+  }, []);
+
+  useEffect(() => {
     localStorage.setItem("favoris", JSON.stringify(favoris));
   }, [favoris]);
 
@@ -63,6 +84,11 @@ function App() {
     setAfficherRecentes(false);
     setAfficherListes(false);
     setMenuOuvert(false);
+    setRecherchesOuvertes(false);
+  };
+
+  const fermerRecherches = () => {
+    setRecherchesOuvertes(false);
   };
 
   const gererFavori = (video) => {
@@ -121,6 +147,7 @@ function App() {
     setAfficherFavoris(false);
     setAfficherRecentes(false);
     setAfficherListes(false);
+    setRecherchesOuvertes(false);
 
     if (rechercheAUtiliser.trim() !== "") {
       setRecherche(rechercheAUtiliser);
@@ -296,7 +323,7 @@ function App() {
     : resultats;
 
   return (
-    <div className="app">
+    <div className="app" onClick={fermerRecherches}>
       <button
         className="bouton-menu"
         onClick={() => setMenuOuvert(!menuOuvert)}
@@ -502,17 +529,42 @@ function App() {
 
           <p>Trouvez facilement des tutoriels vidéo sur tous les sujets.</p>
 
-          <div className="search">
+          <div
+            className="search"
+            onClick={(e) => e.stopPropagation()}
+          >
             <input
               type="text"
               placeholder="Que cherchez-vous ?"
               value={recherche}
               onChange={(e) => setRecherche(e.target.value)}
+              onFocus={() => {
+                if (recherchesRecentes.length > 0) {
+                  setRecherchesOuvertes(true);
+                }
+              }}
               onKeyDown={(e) => {
                 if (e.key === "Enter") lancerRecherche();
               }}
               spellCheck="false"
             />
+
+            {recherchesOuvertes && recherchesRecentes.length > 0 && (
+              <div className="recherches-recentes-dropdown">
+                {recherchesRecentes.map((item) => (
+                  <button
+                    key={item}
+                    onClick={() => {
+                      setRecherche(item);
+                      setRecherchesOuvertes(false);
+                      lancerRecherche(item);
+                    }}
+                  >
+                    🔎 {item}
+                  </button>
+                ))}
+              </div>
+            )}
 
             <button
               className="search-button"
@@ -527,6 +579,7 @@ function App() {
                   setAfficherFavoris(!afficherFavoris);
                   setAfficherRecentes(false);
                   setAfficherListes(false);
+                  setRecherchesOuvertes(false);
                 }}
               >
                 {afficherFavoris
@@ -536,33 +589,19 @@ function App() {
             </div>
           </div>
 
-          {recherchesRecentes.length > 0 && (
-            <div className="recherches-recentes">
-              <span>Recherches récentes :</span>
-
-              {recherchesRecentes.map((item) => (
-                <button
-                  key={item}
-                  onClick={() => {
-                    setRecherche(item);
-                    lancerRecherche(item);
-                  }}
-                >
-                  {item}
-                </button>
-              ))}
-            </div>
-          )}
-
           <div className="categories">
             {categories.map((nom) => (
               <button
                 key={nom}
                 onClick={() => {
-                  const nouvelleCategorie = categorie === nom ? "" : nom;
+                  const nouvelleCategorie =
+                    categorie === nom ? "" : nom;
+
                   setCategorie(nouvelleCategorie);
                   setResultats([]);
                   setErreur("");
+                  setRecherchesOuvertes(false);
+
                   lancerRecherche(recherche, nouvelleCategorie);
                 }}
                 className={categorie === nom ? "active" : ""}
@@ -634,7 +673,8 @@ function App() {
                   </span>
 
                   <span className="date-video">
-                    {" "}·{" "}
+                    {" "}
+                    ·{" "}
                     {new Date(
                       resultat.snippet.publishedAt
                     ).toLocaleDateString("fr-FR")}

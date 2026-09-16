@@ -9,7 +9,8 @@
   --accent-border: rgba(170, 59, 255, 0.5);
   --social-bg: rgba(244, 243, 236, 0.5);
   --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+    rgba(0, 0, 0, 0.1) 0 10px 15px -3px,
+    rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
@@ -17,7 +18,7 @@
 
   font: 18px/145% var(--sans);
   letter-spacing: 0.18px;
-  color-scheme: light dark;
+  color-scheme: light;
   color: var(--text);
   background: var(--bg);
   font-synthesis: none;
@@ -30,28 +31,9 @@
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
-
 body {
   margin: 0;
+  background: var(--bg);
 }
 
 #root {
@@ -77,20 +59,24 @@ h1 {
   font-size: 56px;
   letter-spacing: -1.68px;
   margin: 32px 0;
+
   @media (max-width: 1024px) {
     font-size: 36px;
     margin: 20px 0;
   }
 }
+
 h2 {
   font-size: 24px;
   line-height: 118%;
   letter-spacing: -0.24px;
   margin: 0 0 8px;
+
   @media (max-width: 1024px) {
     font-size: 20px;
   }
 }
+
 p {
   margin: 0;
 }
@@ -108,4 +94,72 @@ code {
   line-height: 135%;
   padding: 4px 8px;
   background: var(--code-bg);
+}
+
+/* ============================= */
+/* BARRE DE RECHERCHE            */
+/* ============================= */
+
+.search {
+  position: relative;
+}
+
+/* ============================= */
+/* RECHERCHES RECENTES           */
+/* ============================= */
+
+.recherches-recentes-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 100%;
+  box-sizing: border-box;
+
+  background: #ffffff;
+  border: 1px solid var(--accent-border);
+  border-radius: 12px;
+
+  box-shadow:
+    0 8px 20px rgba(170, 59, 255, 0.12),
+    0 3px 8px rgba(0, 0, 0, 0.08);
+
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.recherches-recentes-dropdown button {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+
+  padding: 12px 16px;
+  margin: 0;
+
+  border: none;
+  border-bottom: 1px solid rgba(170, 59, 255, 0.12);
+
+  background: #ffffff;
+  color: var(--text-h);
+
+  text-align: left;
+  cursor: pointer;
+
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.4;
+
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    padding-left 0.15s ease;
+}
+
+.recherches-recentes-dropdown button:last-child {
+  border-bottom: none;
+}
+
+.recherches-recentes-dropdown button:hover {
+  background: var(--accent-bg);
+  color: var(--accent);
+  padding-left: 20px;
 }
