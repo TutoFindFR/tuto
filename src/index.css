@@ -8,11 +8,13 @@
   --accent-bg: rgba(170, 59, 255, 0.1);
   --accent-border: rgba(170, 59, 255, 0.5);
   --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --shadow:
+    rgba(0, 0, 0, 0.1) 0 10px 15px -3px,
+    rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+
+  --sans: system-ui, "Segoe UI", Roboto, sans-serif;
+  --heading: system-ui, "Segoe UI", Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
   font: 18px/145% var(--sans);
@@ -24,8 +26,10 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
 
-  @media (max-width: 1024px) {
+@media (max-width: 1024px) {
+  :root {
     font-size: 16px;
   }
 }
@@ -41,8 +45,10 @@
     --accent-bg: rgba(192, 132, 252, 0.15);
     --accent-border: rgba(192, 132, 252, 0.5);
     --social-bg: rgba(47, 48, 58, 0.5);
+
     --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+      rgba(0, 0, 0, 0.4) 0 10px 15px -3px,
+      rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
   }
 
   #social .button-icon {
@@ -77,20 +83,28 @@ h1 {
   font-size: 56px;
   letter-spacing: -1.68px;
   margin: 32px 0;
-  @media (max-width: 1024px) {
+}
+
+@media (max-width: 1024px) {
+  h1 {
     font-size: 36px;
     margin: 20px 0;
   }
 }
+
 h2 {
   font-size: 24px;
   line-height: 118%;
   letter-spacing: -0.24px;
   margin: 0 0 8px;
-  @media (max-width: 1024px) {
+}
+
+@media (max-width: 1024px) {
+  h2 {
     font-size: 20px;
   }
 }
+
 p {
   margin: 0;
 }
@@ -109,9 +123,10 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
-/* =========================================================
-   RECHERCHES RECENTES — STYLE TYPE YOUTUBE
-   ========================================================= */
+
+/* =========================================
+   RECHERCHES RÉCENTES
+   ========================================= */
 
 .search {
   position: relative;
@@ -124,7 +139,6 @@ code {
   right: 0;
 
   background: #ffffff;
-
   border: 1px solid #e5e4e7;
   border-radius: 12px;
 
@@ -133,43 +147,33 @@ code {
     0 2px 6px rgba(0, 0, 0, 0.06);
 
   overflow: hidden;
-
   z-index: 1000;
-
   text-align: left;
 }
 
 .recherches-recentes-titre {
   padding: 13px 17px 9px;
-
   color: #77717f;
-
   font-size: 12px;
   font-weight: 600;
-
   text-transform: uppercase;
   letter-spacing: 0.4px;
 }
 
 .recherches-recentes-dropdown button {
   width: 100%;
-
   display: flex;
   align-items: center;
-
   gap: 12px;
 
   padding: 12px 17px;
 
   border: 0;
-
   background: #ffffff;
   color: #17131c;
 
   font-size: 15px;
-
   text-align: left;
-
   cursor: pointer;
 
   transition:
@@ -188,55 +192,21 @@ code {
 
 .icone-recherche {
   flex: 0 0 auto;
-
   font-size: 15px;
-
   opacity: 0.65;
 }
 
 .texte-recherche {
   min-width: 0;
-
   overflow: hidden;
-
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-.bouton-accueil {
-  position: fixed;
-  top: 20px;
-  left: 70px;
 
-  width: 44px;
-  height: 44px;
+/* =========================================
+   BOUTONS FIXES
+   ========================================= */
 
-  padding: 0;
-
-  border: 1px solid #e5e4e7;
-  border-radius: 10px;
-
-  background: #ffffff;
-  color: #17131c;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  font-size: 20px;
-  line-height: 1;
-
-  cursor: pointer;
-
-  z-index: 1100;
-
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-
-  box-sizing: border-box;
-}
-
-.bouton-accueil:hover {
-  background: #f6f4f8;
-}
 .bouton-menu,
 .bouton-accueil {
   position: fixed;
@@ -250,7 +220,7 @@ code {
   border: 1px solid #e5e4e7;
   border-radius: 10px;
 
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.75);
   color: #17131c;
 
   display: flex;
@@ -267,6 +237,11 @@ code {
   box-sizing: border-box;
 
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  transition: background 0.15s ease;
 }
 
 .bouton-menu {
@@ -279,47 +254,13 @@ code {
 
 .bouton-menu:hover,
 .bouton-accueil:hover {
-  background: #f6f4f8;
-}
-.menu-lateral {
-  position: fixed;
-  top: 0;
-  left: 0;
-
-  width: 280px;
-  height: 100vh;
-
-  background: #ffffff;
-
-  overflow-y: auto;
-
-  z-index: 1000;
-
-  box-sizing: border-box;
-
-  padding: 90px 20px 30px;
-
-  scrollbar-width: thin;
-  scrollbar-color: #d8b4fe transparent;
+  background: rgba(255, 255, 255, 0.9);
 }
 
-/* Barre de défilement du menu */
-.menu-lateral::-webkit-scrollbar {
-  width: 6px;
-}
+/* =========================================
+   MENU FLOTTANT
+   ========================================= */
 
-.menu-lateral::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.menu-lateral::-webkit-scrollbar-thumb {
-  background: #d8b4fe;
-  border-radius: 10px;
-}
-
-.menu-lateral::-webkit-scrollbar-thumb:hover {
-  background: #aa3bff;
-}
 .menu-lateral {
   position: fixed;
   top: 74px;
@@ -331,7 +272,7 @@ code {
   flex-direction: column;
   gap: 8px;
 
-  padding: 12px;
+  padding: 0;
 
   background: transparent;
 
@@ -360,16 +301,18 @@ code {
   border: 1px solid #e5e4e7;
   border-radius: 12px;
 
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.75);
   color: #17131c;
 
   text-align: left;
-
   font-size: 15px;
 
   cursor: pointer;
 
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 
   transition:
     background 0.15s ease,
@@ -377,47 +320,12 @@ code {
 }
 
 .menu-lateral > button:hover {
-  background: #f6f4f8;
+  background: rgba(255, 255, 255, 0.9);
   transform: translateX(3px);
 }
-.menu-lateral {
-  height: auto !important;
-  min-height: 0 !important;
 
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
+/* Fond invisible qui bloque les clics derrière le menu */
 
-  overflow: visible !important;
-
-  padding: 0 !important;
-}
-.menu-lateral {
-  top: 74px !important;
-  left: 20px !important;
-}
-.bouton-accueil {
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-
-.bouton-accueil:hover {
-  background: rgba(255, 255, 255, 0.9);
-}
-.bouton-menu,
-.bouton-accueil,
-.menu-lateral > button {
-  background: rgba(255, 255, 255, 0.75) !important;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-
-.bouton-menu:hover,
-.bouton-accueil:hover,
-.menu-lateral > button:hover {
-  background: rgba(255, 255, 255, 0.9) !important;
-}
 .fond-menu {
   position: fixed;
   inset: 0;
@@ -425,4 +333,239 @@ code {
   background: transparent;
 
   z-index: 900;
+}
+
+/* =========================================
+   MES LISTES — DANS MES FAVORIS
+   ========================================= */
+
+.section-listes-favoris {
+  width: 100%;
+  margin-top: 30px;
+  padding-top: 24px;
+
+  border-top: 1px solid #e5e4e7;
+
+  text-align: left;
+}
+
+.titre-listes-favoris {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+
+  margin-bottom: 16px;
+}
+
+.titre-listes-favoris h3 {
+  margin: 0;
+
+  color: var(--text-h);
+  font-size: 20px;
+  font-weight: 600;
+}
+
+/* Bouton créer */
+
+.bouton-creer-liste {
+  border: 1px solid #e5e4e7;
+  border-radius: 9px;
+
+  padding: 9px 13px;
+
+  background: #ffffff;
+  color: #17131c;
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.bouton-creer-liste:hover {
+  background: #f6f4f8;
+  border-color: #d8d5dc;
+  transform: translateY(-1px);
+}
+
+/* Formulaire de création */
+
+.creation-liste-favoris {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  margin-bottom: 16px;
+  padding: 12px;
+
+  background: #f8f7f9;
+  border: 1px solid #e5e4e7;
+  border-radius: 10px;
+}
+
+.creation-liste-favoris input {
+  flex: 1;
+
+  min-width: 0;
+
+  padding: 10px 12px;
+
+  border: 1px solid #d8d5dc;
+  border-radius: 8px;
+
+  background: #ffffff;
+  color: #17131c;
+
+  font-family: inherit;
+  font-size: 14px;
+
+  outline: none;
+  box-sizing: border-box;
+}
+
+.creation-liste-favoris input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-bg);
+}
+
+.boutons-creation-liste {
+  display: flex;
+  gap: 8px;
+}
+
+.boutons-creation-liste button {
+  padding: 9px 13px;
+
+  border: 1px solid #e5e4e7;
+  border-radius: 8px;
+
+  background: #ffffff;
+  color: #17131c;
+
+  font-family: inherit;
+  font-size: 14px;
+
+  cursor: pointer;
+}
+
+.boutons-creation-liste button:hover {
+  background: #f6f4f8;
+}
+
+.boutons-creation-liste .bouton-creer-liste {
+  background: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
+}
+
+.boutons-creation-liste .bouton-creer-liste:hover {
+  background: #982de5;
+}
+
+/* Message lorsqu'il n'y a aucune liste */
+
+.aucune-liste {
+  margin: 5px 0 0;
+
+  color: var(--text);
+  font-size: 14px;
+}
+
+/* Grille des listes */
+
+.listes-favoris {
+  display: grid;
+
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(210px, 1fr)
+  );
+
+  gap: 12px;
+}
+
+/* Carte d'une liste */
+
+.liste-favori {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+
+  padding: 15px;
+
+  background: #ffffff;
+  border: 1px solid #e5e4e7;
+  border-radius: 10px;
+
+  box-sizing: border-box;
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+}
+
+.liste-favori:hover {
+  border-color: rgba(170, 59, 255, 0.35);
+
+  box-shadow:
+    0 5px 14px rgba(0, 0, 0, 0.07);
+
+  transform: translateY(-2px);
+}
+
+.liste-favori span:first-child {
+  color: var(--text-h);
+
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.liste-favori span:last-child {
+  color: var(--text);
+
+  font-size: 13px;
+}
+
+/* =========================================
+   RESPONSIVE
+   ========================================= */
+
+@media (max-width: 600px) {
+  .titre-listes-favoris {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .bouton-creer-liste {
+    width: 100%;
+  }
+
+  .creation-liste-favoris {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .creation-liste-favoris input {
+    width: 100%;
+  }
+
+  .boutons-creation-liste {
+    width: 100%;
+  }
+
+  .boutons-creation-liste button {
+    flex: 1;
+  }
+
+  .listes-favoris {
+    grid-template-columns: 1fr;
+  }
 }
