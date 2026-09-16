@@ -202,3 +202,227 @@ code {
   white-space: nowrap;
   text-overflow: ellipsis;
 }
+.bouton-accueil {
+  position: fixed;
+  top: 20px;
+  left: 70px;
+
+  width: 44px;
+  height: 44px;
+
+  padding: 0;
+
+  border: 1px solid #e5e4e7;
+  border-radius: 10px;
+
+  background: #ffffff;
+  color: #17131c;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 20px;
+  line-height: 1;
+
+  cursor: pointer;
+
+  z-index: 1100;
+
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+  box-sizing: border-box;
+}
+
+.bouton-accueil:hover {
+  background: #f6f4f8;
+}
+.bouton-menu,
+.bouton-accueil {
+  position: fixed;
+  top: 20px;
+
+  width: 44px;
+  height: 44px;
+
+  padding: 0;
+
+  border: 1px solid #e5e4e7;
+  border-radius: 10px;
+
+  background: #ffffff;
+  color: #17131c;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 20px;
+  line-height: 1;
+
+  cursor: pointer;
+
+  z-index: 1100;
+
+  box-sizing: border-box;
+
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.bouton-menu {
+  left: 20px;
+}
+
+.bouton-accueil {
+  left: 70px;
+}
+
+.bouton-menu:hover,
+.bouton-accueil:hover {
+  background: #f6f4f8;
+}
+.menu-lateral {
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  width: 280px;
+  height: 100vh;
+
+  background: #ffffff;
+
+  overflow-y: auto;
+
+  z-index: 1000;
+
+  box-sizing: border-box;
+
+  padding: 90px 20px 30px;
+
+  scrollbar-width: thin;
+  scrollbar-color: #d8b4fe transparent;
+}
+
+/* Barre de défilement du menu */
+.menu-lateral::-webkit-scrollbar {
+  width: 6px;
+}
+
+.menu-lateral::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.menu-lateral::-webkit-scrollbar-thumb {
+  background: #d8b4fe;
+  border-radius: 10px;
+}
+
+.menu-lateral::-webkit-scrollbar-thumb:hover {
+  background: #aa3bff;
+}
+.menu-lateral {
+  position: fixed;
+  top: 74px;
+  left: 20px;
+
+  width: 230px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  padding: 12px;
+
+  background: transparent;
+
+  transform: translateY(-10px);
+  opacity: 0;
+  pointer-events: none;
+
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+
+  z-index: 1000;
+}
+
+.menu-lateral.ouvert {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.menu-lateral > button {
+  width: 100%;
+
+  padding: 12px 16px;
+
+  border: 1px solid #e5e4e7;
+  border-radius: 12px;
+
+  background: #ffffff;
+  color: #17131c;
+
+  text-align: left;
+
+  font-size: 15px;
+
+  cursor: pointer;
+
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease;
+}
+
+.menu-lateral > button:hover {
+  background: #f6f4f8;
+  transform: translateX(3px);
+}
+.menu-lateral {
+  height: auto !important;
+  min-height: 0 !important;
+
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+
+  overflow: visible !important;
+
+  padding: 0 !important;
+}
+.menu-lateral {
+  top: 74px !important;
+  left: 20px !important;
+}
+.bouton-accueil {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.bouton-accueil:hover {
+  background: rgba(255, 255, 255, 0.9);
+}
+.bouton-menu,
+.bouton-accueil,
+.menu-lateral > button {
+  background: rgba(255, 255, 255, 0.75) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.bouton-menu:hover,
+.bouton-accueil:hover,
+.menu-lateral > button:hover {
+  background: rgba(255, 255, 255, 0.9) !important;
+}
+.fond-menu {
+  position: fixed;
+  inset: 0;
+
+  background: transparent;
+
+  z-index: 900;
+}

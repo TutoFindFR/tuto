@@ -326,6 +326,13 @@ function App() {
   return (
     <div className="app" onClick={fermerRecherches}>
       <button
+  className="bouton-accueil"
+  onClick={revenirAccueil}
+  aria-label="Retour à l'accueil"
+>
+  🏠
+</button>
+      <button
   className="bouton-menu"
   onClick={(e) => {
     e.stopPropagation();
@@ -340,10 +347,7 @@ function App() {
   className={`menu-lateral ${menuOuvert ? "ouvert" : ""}`}
   onClick={(e) => e.stopPropagation()}
 >
-  <button onClick={revenirAccueil}>
-    🏠 Accueil
-  </button>
-
+ 
   <button
     onClick={() => {
       setAfficherFavoris(true);
@@ -377,7 +381,12 @@ function App() {
     📁 Mes listes
   </button>
 </nav>
-
+{menuOuvert && (
+  <div
+    className="fond-menu"
+    onClick={() => setMenuOuvert(false)}
+  />
+)}
       {(afficherFavoris || afficherRecentes || afficherListes) && (
         <button
           className="back-home-button"
