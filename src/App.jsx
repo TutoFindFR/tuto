@@ -88,8 +88,9 @@ function App() {
   };
 
   const fermerRecherches = () => {
-    setRecherchesOuvertes(false);
-  };
+  setRecherchesOuvertes(false);
+  setMenuOuvert(false);
+};
 
   const gererFavori = (video) => {
     setFavoris((anciensFavoris) => {
@@ -325,49 +326,57 @@ function App() {
   return (
     <div className="app" onClick={fermerRecherches}>
       <button
-        className="bouton-menu"
-        onClick={() => setMenuOuvert(!menuOuvert)}
-        aria-label="Ouvrir le menu"
-      >
-        ☰
-      </button>
+  className="bouton-menu"
+  onClick={(e) => {
+    e.stopPropagation();
+    setMenuOuvert((ouvert) => !ouvert);
+  }}
+  aria-label="Ouvrir le menu"
+>
+  ☰
+</button>
 
-      <nav className={`menu-lateral ${menuOuvert ? "ouvert" : ""}`}>
-        <button onClick={revenirAccueil}>🏠 Accueil</button>
+      <nav
+  className={`menu-lateral ${menuOuvert ? "ouvert" : ""}`}
+  onClick={(e) => e.stopPropagation()}
+>
+  <button onClick={revenirAccueil}>
+    🏠 Accueil
+  </button>
 
-        <button
-          onClick={() => {
-            setAfficherFavoris(true);
-            setAfficherRecentes(false);
-            setAfficherListes(false);
-            setMenuOuvert(false);
-          }}
-        >
-          ⭐ Mes favoris
-        </button>
+  <button
+    onClick={() => {
+      setAfficherFavoris(true);
+      setAfficherRecentes(false);
+      setAfficherListes(false);
+      setMenuOuvert(false);
+    }}
+  >
+    ⭐ Mes favoris
+  </button>
 
-        <button
-          onClick={() => {
-            setAfficherFavoris(false);
-            setAfficherRecentes(true);
-            setAfficherListes(false);
-            setMenuOuvert(false);
-          }}
-        >
-          🕘 Recherches récentes
-        </button>
+  <button
+    onClick={() => {
+      setAfficherFavoris(false);
+      setAfficherRecentes(true);
+      setAfficherListes(false);
+      setMenuOuvert(false);
+    }}
+  >
+    🕘 Recherches récentes
+  </button>
 
-        <button
-          onClick={() => {
-            setAfficherFavoris(false);
-            setAfficherRecentes(false);
-            setAfficherListes(true);
-            setMenuOuvert(false);
-          }}
-        >
-          📁 Mes listes
-        </button>
-      </nav>
+  <button
+    onClick={() => {
+      setAfficherFavoris(false);
+      setAfficherRecentes(false);
+      setAfficherListes(true);
+      setMenuOuvert(false);
+    }}
+  >
+    📁 Mes listes
+  </button>
+</nav>
 
       {(afficherFavoris || afficherRecentes || afficherListes) && (
         <button
