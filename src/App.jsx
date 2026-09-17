@@ -10,32 +10,20 @@ function App() {
   const [recherchesOuvertes, setRecherchesOuvertes] = useState(false);
 
   const [recherchesRecentes, setRecherchesRecentes] = useState(() => {
-    const recherchesSauvegardees = localStorage.getItem("recherchesRecentes");
-    return recherchesSauvegardees
-      ? JSON.parse(recherchesSauvegardees)
-      : [];
+    const sauvegardees = localStorage.getItem("recherchesRecentes");
+    return sauvegardees ? JSON.parse(sauvegardees) : [];
   });
 
   const [favoris, setFavoris] = useState(() => {
-    const favorisSauvegardes = localStorage.getItem("favoris");
-    return favorisSauvegardes ? JSON.parse(favorisSauvegardes) : [];
-  });
-
-  const [listes, setListes] = useState(() => {
-    const listesSauvegardees = localStorage.getItem("listes");
-    return listesSauvegardees ? JSON.parse(listesSauvegardees) : [];
+    const sauvegardes = localStorage.getItem("favoris");
+    return sauvegardes ? JSON.parse(sauvegardes) : [];
   });
 
   const [afficherFavoris, setAfficherFavoris] = useState(false);
   const [afficherRecentes, setAfficherRecentes] = useState(false);
-  const [afficherListes, setAfficherListes] = useState(false);
-  const [menuOuvert, setMenuOuvert] = useState(false);
 
   const resultatsRef = useRef(null);
   const [pageToken, setPageToken] = useState("");
-
-  const [creerListeOuvert, setCreerListeOuvert] = useState(false);
-  const [nomNouvelleListe, setNomNouvelleListe] = useState("");
 
   useEffect(() => {
     localStorage.setItem(
@@ -43,6 +31,10 @@ function App() {
       JSON.stringify(recherchesRecentes)
     );
   }, [recherchesRecentes]);
+
+  useEffect(() => {
+    localStorage.setItem("favoris", JSON.stringify(favoris));
+  }, [favoris]);
 
   useEffect(() => {
     const categoriesAccueil = [
@@ -62,14 +54,6 @@ function App() {
     lancerRecherche("", categorieAleatoire);
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem("favoris", JSON.stringify(favoris));
-  }, [favoris]);
-
-  useEffect(() => {
-    localStorage.setItem("listes", JSON.stringify(listes));
-  }, [listes]);
-
   const categories = [
     "Maison",
     "Bricolage",
@@ -82,15 +66,12 @@ function App() {
   const revenirAccueil = () => {
     setAfficherFavoris(false);
     setAfficherRecentes(false);
-    setAfficherListes(false);
-    setMenuOuvert(false);
     setRecherchesOuvertes(false);
   };
 
   const fermerRecherches = () => {
-  setRecherchesOuvertes(false);
-  setMenuOuvert(false);
-};
+    setRecherchesOuvertes(false);
+  };
 
   const gererFavori = (video) => {
     setFavoris((anciensFavoris) => {
@@ -108,37 +89,14 @@ function App() {
     });
   };
 
-  const creerListe = () => {
-    if (nomNouvelleListe.trim() === "") return;
-
-    const nouvelleListe = {
-      id: Date.now(),
-      nom: nomNouvelleListe.trim(),
-      videos: [],
-    };
-
-    setListes((anciennesListes) => [...anciennesListes, nouvelleListe]);
-    setNomNouvelleListe("");
-    setCreerListeOuvert(false);
-  };
-
-  const supprimerListe = (id) => {
-    const confirmation = window.confirm(
-      "Voulez-vous vraiment supprimer cette liste ?"
-    );
-
-    if (!confirmation) return;
-
-    setListes((anciennesListes) =>
-      anciennesListes.filter((liste) => liste.id !== id)
-    );
-  };
-
   const lancerRecherche = async (
     rechercheAUtiliser = recherche,
     categorieRecherche = categorie
   ) => {
-    if (rechercheAUtiliser.trim() === "" && !categorieRecherche) {
+    if (
+      rechercheAUtiliser.trim() === "" &&
+      !categorieRecherche
+    ) {
       setErreur(
         "Choisis une catégorie ou écris quelque chose à rechercher."
       );
@@ -147,7 +105,6 @@ function App() {
 
     setAfficherFavoris(false);
     setAfficherRecentes(false);
-    setAfficherListes(false);
     setRecherchesOuvertes(false);
 
     if (rechercheAUtiliser.trim() !== "") {
@@ -158,7 +115,9 @@ function App() {
 
         const nouvelles = [
           nouvelleRecherche,
-          ...anciennes.filter((item) => item !== nouvelleRecherche),
+          ...anciennes.filter(
+            (item) => item !== nouvelleRecherche
+          ),
         ];
 
         return nouvelles.slice(0, 5);
@@ -235,23 +194,29 @@ function App() {
               .trim()
               .split(/\s+/)
               .filter(
-                (mot) => mot.length > 2 && !motsIgnorer.includes(mot)
+                (mot) =>
+                  mot.length > 2 &&
+                  !motsIgnorer.includes(mot)
               );
 
             let total = motsTutoriel.reduce(
               (scoreActuel, mot) =>
-                scoreActuel + (titre.includes(mot) ? 1 : 0),
+                scoreActuel +
+                (titre.includes(mot) ? 1 : 0),
               0
             );
 
             total -= motsIndesirables.reduce(
               (scoreActuel, mot) =>
-                scoreActuel + (titre.includes(mot) ? 2 : 0),
+                scoreActuel +
+                (titre.includes(mot) ? 2 : 0),
               0
             );
 
             motsRecherche.forEach((mot) => {
-              if (titre.includes(mot)) total += 3;
+              if (titre.includes(mot)) {
+                total += 3;
+              }
             });
 
             return total;
@@ -270,14 +235,18 @@ function App() {
           });
         }, 100);
       } else {
-        setErreur("Aucun résultat trouvé pour cette recherche.");
+        setErreur(
+          "Aucun résultat trouvé pour cette recherche."
+        );
         setPageToken("");
       }
 
       setChargement(false);
     } catch (error) {
       console.error("Erreur YouTube :", error);
-      setErreur("Impossible de récupérer les résultats. Réessaie.");
+      setErreur(
+        "Impossible de récupérer les résultats. Réessaie."
+      );
       setChargement(false);
     }
   };
@@ -312,240 +281,426 @@ function App() {
       setPageToken(data.nextPageToken || "");
       setChargement(false);
     } catch (error) {
-      console.error("Erreur chargement supplémentaire :", error);
+      console.error(
+        "Erreur chargement supplémentaire :",
+        error
+      );
       setChargement(false);
     }
   };
 
+  const ouvrirTutoriel = (videoId) => {
+    window.open(
+      `https://www.youtube.com/watch?v=${videoId}`,
+      "_blank"
+    );
+  };
+
   const videosAffichees = afficherFavoris
     ? favoris
-    : afficherRecentes || afficherListes
+    : afficherRecentes
     ? []
     : resultats;
 
   return (
-  <div className="app" onClick={fermerRecherches}>
-    <button
-      className="bouton-accueil"
-      onClick={revenirAccueil}
-      aria-label="Retour à l'accueil"
-    >
-      🏠
-    </button>
-
-    <button
-      className="bouton-menu"
-      onClick={(e) => {
-        e.stopPropagation();
-        setMenuOuvert((ouvert) => !ouvert);
-      }}
-      aria-label="Ouvrir le menu"
-    >
-      ☰
-    </button>
-
-    <nav
-      className={`menu-lateral ${menuOuvert ? "ouvert" : ""}`}
-      onClick={(e) => e.stopPropagation()}
+    <div
+      className="app"
+      onClick={fermerRecherches}
     >
       <button
-        onClick={() => {
-          setAfficherFavoris(true);
-          setAfficherRecentes(false);
-          setAfficherListes(false);
-          setMenuOuvert(false);
-        }}
-      >
-        ⭐ Mes favoris
-      </button>
-
+  className="bouton-favoris-menu"
+  onClick={() => {
+    setAfficherFavoris(true);
+    setAfficherRecentes(false);
+    setRecherchesOuvertes(false);
+  }}
+  aria-label="Mes favoris"
+>
+  ⭐
+</button>
       <button
-        onClick={() => {
-          setAfficherFavoris(false);
-          setAfficherRecentes(true);
-          setAfficherListes(false);
-          setMenuOuvert(false);
-        }}
-      >
-        🕘 Recherches récentes
-      </button>
-    </nav>
-
-    {menuOuvert && (
-      <div
-        className="fond-menu"
-        onClick={() => setMenuOuvert(false)}
-      />
-    )}
-
-    {(afficherFavoris || afficherRecentes) && (
-      <button
-        className="back-home-button"
+        className="bouton-accueil"
         onClick={revenirAccueil}
         aria-label="Retour à l'accueil"
       >
-        ←
+        🏠
       </button>
-    )}
 
-    {afficherRecentes ? (
-      <>
-        <div className="titre-resultats" ref={resultatsRef}>
-          <h2>🕘 Recherches récentes</h2>
-          <p>
-            {recherchesRecentes.length} recherche
-            {recherchesRecentes.length > 1 ? "s" : ""} enregistrée
-            {recherchesRecentes.length > 1 ? "s" : ""}
-          </p>
-        </div>
+      {(afficherFavoris || afficherRecentes) && (
+        <button
+          className="back-home-button"
+          onClick={revenirAccueil}
+          aria-label="Retour à l'accueil"
+        >
+          ←
+        </button>
+      )}
 
-        {recherchesRecentes.length === 0 ? (
-          <div className="message-accueil">
-            <h2>Aucune recherche récente</h2>
-            <p>Vos recherches apparaîtront ici.</p>
-          </div>
-        ) : (
-          <div className="recherches-recentes menu-recherches">
-            {recherchesRecentes.map((item) => (
-              <button
-                key={item}
-                onClick={() => {
-                  setRecherche(item);
-                  setAfficherRecentes(false);
-                  lancerRecherche(item);
-                }}
-              >
-                🔎 {item}
-              </button>
-            ))}
-          </div>
-        )}
-      </>
-    ) : afficherFavoris ? (
-      <>
-        <div className="titre-resultats" ref={resultatsRef}>
-          <h2>⭐ Mes favoris</h2>
+      {afficherRecentes ? (
+        <>
+          <div
+            className="titre-resultats"
+            ref={resultatsRef}
+          >
+            <h2>🕘 Recherches récentes</h2>
 
-          <p>
-            {favoris.length}{" "}
-            {favoris.length > 1
-              ? "tutoriels enregistrés"
-              : "tutoriel enregistré"}
-          </p>
-        </div>
-
-        <div className="section-listes-favoris">
-          <div className="titre-listes-favoris">
-            <h3>📁 Mes listes</h3>
-
-            <button
-              className="bouton-creer-liste"
-              onClick={() => setCreerListeOuvert(true)}
-            >
-              ➕ Créer une liste
-            </button>
+            <p>
+              {recherchesRecentes.length} recherche
+              {recherchesRecentes.length > 1 ? "s" : ""}
+              {" "}
+              enregistrée
+              {recherchesRecentes.length > 1 ? "s" : ""}
+            </p>
           </div>
 
-          {creerListeOuvert && (
-            <div className="creation-liste-favoris">
-              <input
-                type="text"
-                placeholder="Nom de votre liste"
-                value={nomNouvelleListe}
-                onChange={(e) => setNomNouvelleListe(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") creerListe();
-                }}
-                autoFocus
-              />
-
-              <div className="boutons-creation-liste">
+          {recherchesRecentes.length === 0 ? (
+            <div className="message-accueil">
+              <h2>Aucune recherche récente</h2>
+              <p>
+                Vos recherches apparaîtront ici.
+              </p>
+            </div>
+          ) : (
+            <div className="recherches-recentes menu-recherches">
+              {recherchesRecentes.map((item) => (
                 <button
-                  className="bouton-creer-liste"
-                  onClick={creerListe}
-                >
-                  Créer
-                </button>
-
-                <button
+                  key={item}
                   onClick={() => {
-                    setCreerListeOuvert(false);
-                    setNomNouvelleListe("");
+                    setRecherche(item);
+                    setAfficherRecentes(false);
+                    lancerRecherche(item);
                   }}
                 >
-                  Annuler
+                  🔎 {item}
                 </button>
-              </div>
-            </div>
-          )}
-
-          {listes.length === 0 ? (
-            <p className="aucune-liste">
-              Créez votre première liste pour organiser vos tutoriels.
-            </p>
-          ) : (
-            <div className="listes-favoris">
-              {listes.map((liste) => (
-                <div className="liste-favori" key={liste.id}>
-                  <span>📁 {liste.nom}</span>
-
-                  <span>
-                    {liste.videos.length} tutoriel
-                    {liste.videos.length > 1 ? "s" : ""}
-                  </span>
-
-                  <button
-                    onClick={() => supprimerListe(liste.id)}
-                  >
-                    🗑️
-                  </button>
-                </div>
               ))}
             </div>
           )}
-        </div>
+        </>
+      ) : afficherFavoris ? (
+        <>
+          <div
+            className="titre-resultats"
+            ref={resultatsRef}
+          >
+            <h2>⭐ Mes favoris</h2>
 
-        {favoris.length === 0 && (
-          <div className="message-accueil">
-            <h2>Aucun favori pour le moment</h2>
             <p>
-              Ajoutez des tutoriels à vos favoris avec l'étoile ⭐.
+              {favoris.length}{" "}
+              {favoris.length > 1
+                ? "tutoriels enregistrés"
+                : "tutoriel enregistré"}
             </p>
           </div>
-        )}
 
-        {favoris.length > 0 && (
+          {favoris.length === 0 && (
+            <div className="message-accueil">
+              <h2>Aucun favori pour le moment</h2>
+
+              <p>
+                Ajoutez des tutoriels à vos favoris
+                avec l'étoile ⭐.
+              </p>
+            </div>
+          )}
+
+          {favoris.length > 0 && (
+            <div className="resultats">
+              {favoris.map((resultat) => {
+                const estFavori = favoris.some(
+                  (favori) =>
+                    favori.id.videoId ===
+                    resultat.id.videoId
+                );
+
+                return (
+                  <div
+                    className="resultat"
+                    key={resultat.id.videoId}
+                    onClick={() =>
+                      ouvrirTutoriel(resultat.id.videoId)
+                    }
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (
+                        e.key === "Enter" ||
+                        e.key === " "
+                      ) {
+                        e.preventDefault();
+                        ouvrirTutoriel(
+                          resultat.id.videoId
+                        );
+                      }
+                    }}
+                  >
+                    <div className="image-resultat">
+                      <img
+                        src={
+                          resultat.snippet.thumbnails
+                            .medium.url
+                        }
+                        alt={resultat.snippet.title}
+                      />
+
+                      <span className="badge-tutoriel">
+                        TUTORIEL
+                      </span>
+
+                      <button
+                        className={`bouton-favori ${
+                          estFavori
+                            ? "favori-actif"
+                            : ""
+                        }`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          gererFavori(resultat);
+                        }}
+                        aria-label={
+                          estFavori
+                            ? "Retirer des favoris"
+                            : "Ajouter aux favoris"
+                        }
+                      >
+                        {estFavori ? "★" : "☆"}
+                      </button>
+                    </div>
+
+                    <h3>{resultat.snippet.title}</h3>
+
+                    <small>
+                      <span className="chaine">
+                        {resultat.snippet.channelTitle}
+                      </span>
+
+                      <span className="date-video">
+                        {" · "}
+                        {new Date(
+                          resultat.snippet.publishedAt
+                        ).toLocaleDateString("fr-FR")}
+                      </span>
+                    </small>
+
+                    <p>
+                      {resultat.snippet.description.length >
+                      120
+                        ? resultat.snippet.description.substring(
+                            0,
+                            120
+                          ) + "..."
+                        : resultat.snippet.description}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </>
+      ) : (
+        <>
+          <h1 className="logo">TutoFind</h1>
+
+          <p>
+            Trouvez facilement des tutoriels vidéo
+            sur tous les sujets.
+          </p>
+
+          <div
+            className="search"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <input
+              type="text"
+              placeholder="Que cherchez-vous ?"
+              value={recherche}
+              onChange={(e) => {
+                setRecherche(e.target.value);
+                setRecherchesOuvertes(false);
+              }}
+              onFocus={() => {
+                if (
+                  recherchesRecentes.length > 0 &&
+                  recherche.trim() === ""
+                ) {
+                  setRecherchesOuvertes(true);
+                }
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  setRecherchesOuvertes(false);
+                  lancerRecherche();
+                }
+              }}
+              spellCheck="false"
+            />
+
+            {recherchesOuvertes &&
+              recherchesRecentes.length > 0 && (
+                <div
+                  className="recherches-recentes-dropdown"
+                  onClick={(e) =>
+                    e.stopPropagation()
+                  }
+                >
+                  <div className="recherches-recentes-titre">
+                    Recherches récentes
+                  </div>
+
+                  {recherchesRecentes.map((item) => (
+                    <button
+                      key={item}
+                      onClick={() => {
+                        setRecherche(item);
+                        setRecherchesOuvertes(false);
+                        lancerRecherche(item);
+                      }}
+                    >
+                      <span className="icone-recherche">
+                        🕘
+                      </span>
+
+                      <span className="texte-recherche">
+                        {item}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+            <button
+              className="search-button"
+              onClick={() => {
+                setRecherchesOuvertes(false);
+                lancerRecherche();
+              }}
+            >
+              Rechercher
+            </button>
+
+            <div className="mes-favoris">
+              <button
+                onClick={() => {
+                  setAfficherFavoris(!afficherFavoris);
+                  setAfficherRecentes(false);
+                  setRecherchesOuvertes(false);
+                }}
+              >
+                ⭐ Mes favoris ({favoris.length})
+              </button>
+            </div>
+          </div>
+
+          <div className="categories">
+            {categories.map((nom) => (
+              <button
+                key={nom}
+                onClick={() => {
+                  const nouvelleCategorie =
+                    categorie === nom ? "" : nom;
+
+                  setCategorie(nouvelleCategorie);
+                  setResultats([]);
+                  setErreur("");
+                  setRecherchesOuvertes(false);
+
+                  lancerRecherche(
+                    recherche,
+                    nouvelleCategorie
+                  );
+                }}
+                className={
+                  categorie === nom ? "active" : ""
+                }
+              >
+                {nom}
+              </button>
+            ))}
+          </div>
+
+          {categorie && (
+            <p>
+              Catégorie sélectionnée : {categorie}
+            </p>
+          )}
+
+          {chargement && (
+            <p>Recherche en cours...</p>
+          )}
+
+          {!chargement &&
+            !erreur &&
+            resultats.length === 0 && (
+              <div className="message-accueil">
+                <h2>
+                  Que voulez-vous apprendre
+                  aujourd'hui ?
+                </h2>
+
+                <p>
+                  Recherchez un tutoriel ou choisissez
+                  une catégorie.
+                </p>
+              </div>
+            )}
+
+          {erreur && <p>{erreur}</p>}
+
+          {resultats.length > 0 && (
+            <div
+              className="titre-resultats"
+              ref={resultatsRef}
+            >
+              <h2>
+                Résultats pour : {recherche}
+              </h2>
+
+              <p>
+                {resultats.length} résultats trouvés
+              </p>
+            </div>
+          )}
+        </>
+      )}
+
+      {!afficherFavoris &&
+        !afficherRecentes &&
+        videosAffichees.length > 0 && (
           <div className="resultats">
-            {favoris.map((resultat) => {
+            {videosAffichees.map((resultat) => {
               const estFavori = favoris.some(
                 (favori) =>
-                  favori.id.videoId === resultat.id.videoId
+                  favori.id.videoId ===
+                  resultat.id.videoId
               );
-
-              const ouvrirTutoriel = () => {
-                window.open(
-                  `https://www.youtube.com/watch?v=${resultat.id.videoId}`,
-                  "_blank"
-                );
-              };
 
               return (
                 <div
                   className="resultat"
                   key={resultat.id.videoId}
-                  onClick={ouvrirTutoriel}
+                  onClick={() =>
+                    ouvrirTutoriel(resultat.id.videoId)
+                  }
                   role="button"
                   tabIndex={0}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
+                    if (
+                      e.key === "Enter" ||
+                      e.key === " "
+                    ) {
                       e.preventDefault();
-                      ouvrirTutoriel();
+                      ouvrirTutoriel(
+                        resultat.id.videoId
+                      );
                     }
                   }}
                 >
                   <div className="image-resultat">
                     <img
-                      src={resultat.snippet.thumbnails.medium.url}
+                      src={
+                        resultat.snippet.thumbnails
+                          .medium.url
+                      }
                       alt={resultat.snippet.title}
                     />
 
@@ -555,7 +710,9 @@ function App() {
 
                     <button
                       className={`bouton-favori ${
-                        estFavori ? "favori-actif" : ""
+                        estFavori
+                          ? "favori-actif"
+                          : ""
                       }`}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -579,8 +736,7 @@ function App() {
                     </span>
 
                     <span className="date-video">
-                      {" "}
-                      ·{" "}
+                      {" · "}
                       {new Date(
                         resultat.snippet.publishedAt
                       ).toLocaleDateString("fr-FR")}
@@ -588,7 +744,8 @@ function App() {
                   </small>
 
                   <p>
-                    {resultat.snippet.description.length > 120
+                    {resultat.snippet.description.length >
+                    120
                       ? resultat.snippet.description.substring(
                           0,
                           120
@@ -600,264 +757,22 @@ function App() {
             })}
           </div>
         )}
-      </>
-    ) : (
-      <>
-        <h1 className="logo">TutoFind</h1>
 
-        <p>
-          Trouvez facilement des tutoriels vidéo sur tous les sujets.
-        </p>
-
-        <div
-          className="search"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <input
-            type="text"
-            placeholder="Que cherchez-vous ?"
-            value={recherche}
-            onChange={(e) => {
-              setRecherche(e.target.value);
-              setRecherchesOuvertes(false);
-            }}
-            onFocus={() => {
-              if (
-                recherchesRecentes.length > 0 &&
-                recherche.trim() === ""
-              ) {
-                setRecherchesOuvertes(true);
-              }
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                setRecherchesOuvertes(false);
-                lancerRecherche();
-              }
-            }}
-            spellCheck="false"
-          />
-
-          {recherchesOuvertes &&
-            recherchesRecentes.length > 0 && (
-              <div
-                className="recherches-recentes-dropdown"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className="recherches-recentes-titre">
-                  Recherches récentes
-                </div>
-
-                {recherchesRecentes.map((item) => (
-                  <button
-                    key={item}
-                    onClick={() => {
-                      setRecherche(item);
-                      setRecherchesOuvertes(false);
-                      lancerRecherche(item);
-                    }}
-                  >
-                    <span className="icone-recherche">
-                      🕘
-                    </span>
-
-                    <span className="texte-recherche">
-                      {item}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            )}
-
+      {!afficherFavoris &&
+        !afficherRecentes &&
+        pageToken && (
           <button
-            className="search-button"
-            onClick={() => {
-              setRecherchesOuvertes(false);
-              lancerRecherche();
-            }}
+            className="voir-plus"
+            onClick={chargerPlus}
+            disabled={chargement}
           >
-            Rechercher
+            {chargement
+              ? "Chargement..."
+              : "Voir plus"}
           </button>
-
-          <div className="mes-favoris">
-            <button
-              onClick={() => {
-                setAfficherFavoris(!afficherFavoris);
-                setAfficherRecentes(false);
-                setAfficherListes(false);
-                setRecherchesOuvertes(false);
-              }}
-            >
-              {afficherFavoris
-                ? "← Retour aux résultats"
-                : `⭐ Mes favoris (${favoris.length})`}
-            </button>
-          </div>
-        </div>
-
-        <div className="categories">
-          {categories.map((nom) => (
-            <button
-              key={nom}
-              onClick={() => {
-                const nouvelleCategorie =
-                  categorie === nom ? "" : nom;
-
-                setCategorie(nouvelleCategorie);
-                setResultats([]);
-                setErreur("");
-                setRecherchesOuvertes(false);
-
-                lancerRecherche(recherche, nouvelleCategorie);
-              }}
-              className={categorie === nom ? "active" : ""}
-            >
-              {nom}
-            </button>
-          ))}
-        </div>
-
-        {categorie && (
-          <p>Catégorie sélectionnée : {categorie}</p>
         )}
-
-        {chargement && <p>Recherche en cours...</p>}
-
-        {!chargement &&
-          !erreur &&
-          resultats.length === 0 && (
-            <div className="message-accueil">
-              <h2>
-                Que voulez-vous apprendre aujourd'hui ?
-              </h2>
-              <p>
-                Recherchez un tutoriel ou choisissez une catégorie.
-              </p>
-            </div>
-          )}
-
-        {erreur && <p>{erreur}</p>}
-
-        {resultats.length > 0 && (
-          <div
-            className="titre-resultats"
-            ref={resultatsRef}
-          >
-            <h2>Résultats pour : {recherche}</h2>
-            <p>{resultats.length} résultats trouvés</p>
-          </div>
-        )}
-      </>
-    )}
-
-    {!afficherFavoris &&
-      !afficherRecentes &&
-      !afficherListes &&
-      videosAffichees.length > 0 && (
-        <div className="resultats">
-          {videosAffichees.map((resultat) => {
-            const estFavori = favoris.some(
-              (favori) =>
-                favori.id.videoId === resultat.id.videoId
-            );
-
-            const ouvrirTutoriel = () => {
-              window.open(
-                `https://www.youtube.com/watch?v=${resultat.id.videoId}`,
-                "_blank"
-              );
-            };
-
-            return (
-              <div
-                className="resultat"
-                key={resultat.id.videoId}
-                onClick={ouvrirTutoriel}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    ouvrirTutoriel();
-                  }
-                }}
-              >
-                <div className="image-resultat">
-                  <img
-                    src={
-                      resultat.snippet.thumbnails.medium.url
-                    }
-                    alt={resultat.snippet.title}
-                  />
-
-                  <span className="badge-tutoriel">
-                    TUTORIEL
-                  </span>
-
-                  <button
-                    className={`bouton-favori ${
-                      estFavori ? "favori-actif" : ""
-                    }`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      gererFavori(resultat);
-                    }}
-                    aria-label={
-                      estFavori
-                        ? "Retirer des favoris"
-                        : "Ajouter aux favoris"
-                    }
-                  >
-                    {estFavori ? "★" : "☆"}
-                  </button>
-                </div>
-
-                <h3>{resultat.snippet.title}</h3>
-
-                <small>
-                  <span className="chaine">
-                    {resultat.snippet.channelTitle}
-                  </span>
-
-                  <span className="date-video">
-                    {" "}
-                    ·{" "}
-                    {new Date(
-                      resultat.snippet.publishedAt
-                    ).toLocaleDateString("fr-FR")}
-                  </span>
-                </small>
-
-                <p>
-                  {resultat.snippet.description.length > 120
-                    ? resultat.snippet.description.substring(
-                        0,
-                        120
-                      ) + "..."
-                    : resultat.snippet.description}
-                </p>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-    {!afficherFavoris &&
-      !afficherRecentes &&
-      !afficherListes &&
-      pageToken && (
-        <button
-          className="voir-plus"
-          onClick={chargerPlus}
-          disabled={chargement}
-        >
-          {chargement
-            ? "Chargement..."
-            : "Voir plus"}
-        </button>
-      )}
-  </div>
-);
+    </div>
+  );
 }
 
 export default App;

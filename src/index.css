@@ -249,7 +249,7 @@ code {
 }
 
 .bouton-accueil {
-  left: 70px;
+  left: 20px;
 }
 
 .bouton-menu:hover,
@@ -263,27 +263,21 @@ code {
 
 .menu-lateral {
   position: fixed;
-  top: 74px;
+  top: 110px;
   left: 20px;
-
   width: 230px;
-
   display: flex;
   flex-direction: column;
   gap: 8px;
-
   padding: 0;
-
+  margin: 0;
   background: transparent;
-
-  transform: translateY(-10px);
+  transform: none;
   opacity: 0;
   pointer-events: none;
-
   transition:
     opacity 0.2s ease,
     transform 0.2s ease;
-
   z-index: 1000;
 }
 
@@ -568,4 +562,43 @@ code {
   .listes-favoris {
     grid-template-columns: 1fr;
   }
+}
+.bouton-favoris-menu {
+  position: fixed;
+  top: 20px;
+  left: 70px;
+  width: 44px;
+  height: 44px;
+
+  padding: 0;
+
+  border: 1px solid #e5e4e7;
+  border-radius: 10px;
+
+  background: rgba(255, 255, 255, 0.75);
+  color: #17131c;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 20px;
+  line-height: 1;
+
+  cursor: pointer;
+
+  z-index: 1100;
+
+  box-sizing: border-box;
+
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  transition: background 0.15s ease;
+}
+
+.bouton-favoris-menu:hover {
+  background: rgba(255, 255, 255, 0.95);
 }
